@@ -1,7 +1,7 @@
 # Личный проект «TaskForce»
 
 * Студент: [Наталья Романова](https://up.htmlacademy.ru/yii-individual/1/user/1515049).
-* Наставник: `Неизвестно`.
+* Наставник: `Сергей Парфёнов`.
 
 ---
 
@@ -34,7 +34,8 @@ _`.editorconfig`, `.gitattributes`, `.gitignore`._
 
 #### 3. Клонируйте репозиторий на свой компьютер
 
-Будьте внимательны: нужно клонировать свой репозиторий (форк), а не репозиторий Академии. Также обратите внимание, что клонировать репозиторий нужно через SSH, а не через HTTPS. Нажмите зелёную кнопку в правой части экрана, чтобы скопировать SSH-адрес вашего репозитория:
+Будьте внимательны: нужно клонировать свой репозиторий (форк), а не репозиторий Академии. Также обратите внимание, что клонировать
+репозиторий нужно через SSH, а не через HTTPS. Нажмите зелёную кнопку в правой части экрана, чтобы скопировать SSH-адрес вашего репозитория:
 
 <img width="767" alt="" src="https://user-images.githubusercontent.com/8537950/65958001-992dac00-e44e-11e9-9ac4-9dbb98d7e410.png">
 
@@ -52,4 +53,5 @@ git clone SSH-адрес_вашего_форка
 
 <a href="https://htmlacademy.ru/intensive/php2"><img align="left" width="50" height="50" alt="HTML Academy" src="https://up.htmlacademy.ru/static/img/intensive/yii/logo-for-github-2.png"></a>
 
-Репозиторий создан для обучения на профессиональном онлайн‑курсе «[PHP, уровень 2](https://htmlacademy.ru/intensive/php2)» от [HTML Academy](https://htmlacademy.ru).
+Репозиторий создан для обучения на профессиональном онлайн‑курсе «[PHP, уровень 2](https://htmlacademy.ru/intensive/php2)»
+от[HTML Academy](https://htmlacademy.ru).
