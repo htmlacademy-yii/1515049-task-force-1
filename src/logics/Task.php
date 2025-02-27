@@ -75,12 +75,12 @@ class Task
         return $transitions[$action] ?? null;
     }
 
-    public function getAvailableActions(): array
+    public function getAvailableActions(string $status): array
     {
         $actions = [
             self::STATUS_NEW => [self::ACTION_RESPOND, self::ACTION_CANCEL],
             self::STATUS_IN_PROGRESS => [self::ACTION_EXECUTE, self::ACTION_REFUSAL],
         ];
-        return $actions[$this->currentStatus] ?? [];
+        return $actions[$status] ?? [];
     }
 }
