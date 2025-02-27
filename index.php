@@ -1,6 +1,8 @@
 <?php
 
-require_once 'src/logics/Task.php';
+require_once 'vendor/autoload.php';
+
+use App\Logics\Task;
 
 $task = new Task(1, 2);
 
