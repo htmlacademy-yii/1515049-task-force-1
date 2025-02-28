@@ -6,7 +6,7 @@ class Task
     // статусы
     const string STATUS_NEW = 'new';
     const string STATUS_CANCELLED = 'cancelled';
-    const string STATUS_IN_PROGRESS = 'inProgress';
+    const string STATUS_IN_PROGRESS = 'in_progress';
     const string STATUS_COMPLETED = 'completed';
     const string STATUS_FAILED = 'failed';
 
