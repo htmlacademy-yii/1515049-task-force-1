@@ -12,6 +12,9 @@ CREATE TABLE users (
                        role ENUM('customer', 'executor') NOT NULL,
                        city_id INT,
                        avatar VARCHAR(255),
+                       telegram VARCHAR(255),
+                       phone VARCHAR(20),
+                       show_contacts BOOLEAN DEFAULT TRUE,
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        FOREIGN KEY (city_id) REFERENCES cities(id)
 );
