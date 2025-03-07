@@ -11,5 +11,6 @@
             "email": "Natalocka_ne@mail.ru"
         }
     ],
-    "require": {}
-}
+    "require": {
+      "php": "^8.3"
+    }
