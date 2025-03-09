@@ -15,13 +15,6 @@ class Task
     const string STATUS_COMPLETED = 'completed';
     const string STATUS_FAILED = 'failed';
 
-    // действия
-    const string ACTION_FAIL = 'fail';
-    const string ACTION_CANCEL = 'cancel';
-    const string ACTION_ASSIGN = 'assign';
-    const string ACTION_RESPOND = 'respond';
-    const string ACTION_EXECUTE = 'execute';
-
     private string $currentStatus;
     private int $customerId;
     private ?int $executorId;
@@ -52,39 +45,41 @@ class Task
     /**
      * Карта действий
      *
-     * @return string[]
+     * @return array [внутреннее_имя => название]
      */
     public static function getActionsMap(): array
     {
         return [
-            self::ACTION_CANCEL => 'Отменить',
-            self::ACTION_ASSIGN => 'Выбрать исполнителя',
-            self::ACTION_EXECUTE => 'Выполнено',
-            self::ACTION_RESPOND => 'Откликнуться',
-            self::ACTION_FAIL => 'Отказаться'
+            'cancel' => 'Отменить',
+            'assign' => 'Выбрать исполнителя',
+            'respond' => 'Откликнуться',
+            'execute' => 'Выполнено',
+            'fail' => 'Отказаться',
         ];
     }
 
     /**
      * Получение статуса, в который он перейдет после выполнения указанного действия
      *
-     * @param string $action действие
+     * @param Action $action действие
      * @return string|null следующий статус или null
      */
-    public function getNextStatus(string $action): ?string
+    public function getNextStatus(Action $action): ?string
     {
         $transitions = [
             self::STATUS_NEW => [
-                self::ACTION_ASSIGN => self::STATUS_IN_PROGRESS,
-                self::ACTION_CANCEL => self::STATUS_CANCELLED,
+                "assign" => self::STATUS_IN_PROGRESS,
+                "cancel" => self::STATUS_CANCELLED,
             ],
             self::STATUS_IN_PROGRESS => [
-                self::ACTION_EXECUTE => self::STATUS_COMPLETED,
-                self::ACTION_FAIL => self::STATUS_FAILED,
+                "execute" => self::STATUS_COMPLETED,
+                "fail" => self::STATUS_FAILED,
             ],
         ];
 
-        return $transitions[$this->currentStatus][$action] ?? null;
+        $actionName = $action->getInternalName();
+
+        return $transitions[$this->currentStatus][$actionName] ?? null;
     }
 
     /**
@@ -95,19 +90,27 @@ class Task
      */
     public function getAvailableActions(int $userId): array
     {
-        if ($userId === $this->customerId) {
-            return $this->currentStatus === self::STATUS_NEW
-                ? [self::ACTION_CANCEL, self::ACTION_ASSIGN]
-                : [];
+        $actions = [];
+        if ($this->currentStatus === self::STATUS_NEW) {
+            if ($userId === $this->customerId) {
+                $actions[] = new ActionAssign();
+                $actions[] = new ActionCancel();
+            }
+            if ($this->executorId === null) {
+                $actions[] = new ActionRespond();
+            }
         }
-        if ($this->executorId === null && $this->currentStatus === self::STATUS_NEW) {
-            return [self::ACTION_RESPOND];
+
+        if ($this->currentStatus === self::STATUS_IN_PROGRESS) {
+            if ($userId === $this->customerId) {
+                $actions[] = new ActionExecute();
+            } else if ($userId === $this->executorId) {
+                $actions[] = new ActionFail();
+            }
         }
-        if ($userId === $this->executorId) {
-            return $this->currentStatus === self::STATUS_IN_PROGRESS
-                ? [self::ACTION_EXECUTE, self::ACTION_FAIL]
-                : [];
-        }
-        return [];
+
+        return array_filter($actions, function ($action) use ($userId) {
+            return $action->isAvailable($this->customerId, $userId, $this->executorId);
+        });
     }
 }
