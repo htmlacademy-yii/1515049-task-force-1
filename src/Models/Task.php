@@ -117,7 +117,7 @@ class Task
         }
 
         return array_filter($actions, function ($action) use ($userId) {
-            return $action->isAvailable($this->customerId, $userId, $this->executorId);
+            return $action->isAvailable($userId, $this->customerId, $this->executorId);
         });
     }
 }
