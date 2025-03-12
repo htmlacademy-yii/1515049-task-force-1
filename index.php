@@ -1,56 +1,52 @@
 <?php
-require_once ('vendor/autoload.php');
 
-use App\Logics\Task;
+require_once 'vendor/autoload.php';
 
-// Тест: новая задача должна иметь действия "Откликнуться" и "Отменить" для разных пользователей
-$task = new Task(1);
+use App\Actions\ActionAssign;
+use App\Actions\ActionCancel;
+use App\Actions\ActionExecute;
+use App\Actions\ActionFail;
+use App\Actions\ActionRespond;
+use App\Models\Task;
 
-assert($task->getAvailableActions(1) === [Task::ACTION_CANCEL, Task::ACTION_ASSIGN], 'Ошибка: Для заказчика должны быть доступны "Отменить" и "Выбрать исполнителя".');
-assert($task->getAvailableActions(2) === [Task::ACTION_RESPOND], 'Ошибка: Для исполнителя должно быть доступно "Откликнуться".');
-
-// Тест: отмена задачи должна приводить к статусу "отменено"
-assert($task->getNextStatus(Task::ACTION_CANCEL) === Task::STATUS_CANCELLED, 'Ошибка: Отмена задачи должна привести к статусу "Отменено".');
-
-// Тест: выбор исполнителя должен перевести задачу в статус "в работе"
-assert($task->getNextStatus(Task::ACTION_ASSIGN) === Task::STATUS_IN_PROGRESS, 'Ошибка: Выбор исполнителя должен перевести задачу в "В работе".');
-
-// Тест: выполнение задачи должно перевести её в статус "выполнено"
-$taskInProgress = new Task(1, Task::STATUS_IN_PROGRESS, 2);
-assert($taskInProgress->getNextStatus(Task::ACTION_EXECUTE) === Task::STATUS_COMPLETED, 'Ошибка: Выполнение задачи должно перевести её в статус "Выполнено".');
-
-// Тест: отказ от выполнения должен привести к "провалено"
-assert($taskInProgress->getNextStatus(Task::ACTION_FAIL) === Task::STATUS_FAILED, 'Ошибка: Отказ от выполнения должен привести к "Провалено".');
-
-// Тест: У задачи без исполнителя нельзя завершить работу
-$taskWithoutExecutor = new Task(1, Task::STATUS_IN_PROGRESS);
-assert(!in_array(Task::ACTION_EXECUTE, $taskWithoutExecutor->getAvailableActions(1)), 'Ошибка: У задачи без исполнителя нельзя завершить работу.');
-
-// Тест: заказчик выбирает исполнителя
+// Тест 1: Задание в статусе "Новое" может быть отменено только автором задания
 $taskNew = new Task(1, Task::STATUS_NEW);
-assert($taskNew->getNextStatus(Task::ACTION_ASSIGN) === Task::STATUS_IN_PROGRESS, 'Ошибка: Выбор исполнителя должен перевести задачу в "В работе".');
+$availableActionsForCustomer = $taskNew->getAvailableActions(1);
+assert(count($availableActionsForCustomer) === 2, 'Ошибка: Для заказчика должны быть доступны "Отменить" и "Выбрать исполнителя".');
+assert($availableActionsForCustomer[0] instanceof ActionAssign, 'Ошибка: Должно быть доступно действие "Выбрать исполнителя".');
+assert($availableActionsForCustomer[1] instanceof ActionCancel, 'Ошибка: Должно быть доступно действие "Отменить".');
 
-// Проверяем доступные действия для завершенной задачи
+$availableActionsForExecutor = $taskNew->getAvailableActions(2);
+assert(count($availableActionsForExecutor) === 1, 'Ошибка: Для исполнителя должно быть доступно "Откликнуться".');
+assert($availableActionsForExecutor[0] instanceof ActionRespond, 'Ошибка: Должно быть доступно действие "Откликнуться".');
+
+// Тест 2: Задание в статусе "В работе" может быть отменено только исполнителем
+$taskInProgress = new Task(1, Task::STATUS_IN_PROGRESS, 2);
+$availableActionsForExecutor = $taskInProgress->getAvailableActions(2);
+assert(count($availableActionsForExecutor) === 1, 'Ошибка: Для исполнителя должно быть доступно "Отказаться".');
+assert($availableActionsForExecutor[0] instanceof ActionFail, 'Ошибка: Должно быть доступно действие "Отказаться".');
+
+// Тест 3: Задание в статусе "В работе" может быть завершено только заказчиком
+$availableActionsForCustomer = $taskInProgress->getAvailableActions(1);
+assert(count($availableActionsForCustomer) === 1, 'Ошибка: Для заказчика должно быть доступно "Выполнить".');
+assert($availableActionsForCustomer[0] instanceof ActionExecute, 'Ошибка: Должно быть доступно действие "Выполнить".');
+
+// Тест 4: Задание в статусе "Новое" не может быть завершено или отменено исполнителем
+$taskNew = new Task(1, Task::STATUS_NEW);
+$availableActionsForExecutor = $taskNew->getAvailableActions(2);
+assert(count($availableActionsForExecutor) === 1, 'Ошибка: Для исполнителя должно быть доступно только "Откликнуться".');
+assert($availableActionsForExecutor[0] instanceof ActionRespond, 'Ошибка: Должно быть доступно действие "Откликнуться".');
+
+// Тест 5: Задание в статусе "Завершено" не имеет доступных действий
 $taskCompleted = new Task(1, Task::STATUS_COMPLETED);
 assert(empty($taskCompleted->getAvailableActions(1)), 'Ошибка: Завершенная задача не должна иметь доступных действий.');
 
-// Проверяем доступные действия для отмененной задачи
+// Тест 6: Задание в статусе "Отменено" не имеет доступных действий
 $taskCancelled = new Task(1, Task::STATUS_CANCELLED);
 assert(empty($taskCancelled->getAvailableActions(1)), 'Ошибка: Отмененная задача не должна иметь доступных действий.');
 
-// Проверяем доступные действия для проваленной задачи
+// Тест 7: Задание в статусе "Провалено" не имеет доступных действий
 $taskFailed = new Task(1, Task::STATUS_FAILED);
 assert(empty($taskFailed->getAvailableActions(1)), 'Ошибка: Проваленная задача не должна иметь доступных действий.');
-
-// Тест: карта статусов
-assert(Task::getStatusMap()[Task::STATUS_NEW] === 'Новое', 'Ошибка: Неверное имя статуса "Новое".');
-assert(Task::getStatusMap()[Task::STATUS_COMPLETED] === 'Выполнено', 'Ошибка: Неверное имя статуса "Выполнено".');
-
-// Тест: карта действий
-assert(Task::getActionsMap()[Task::ACTION_EXECUTE] === 'Выполнено', 'Ошибка: Неверное имя действия "Выполнено".');
-assert(Task::getActionsMap()[Task::ACTION_FAIL] === 'Отказаться', 'Ошибка: Неверное имя действия "Отказаться".');
-
-// Тест: неизвестное действие не меняет статус
-assert($taskNew->getNextStatus('неизвестное') === null, 'Ошибка: Неизвестное действие не должно менять статус.');
 
 echo "Все тесты пройдены!";
