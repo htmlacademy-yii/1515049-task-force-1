@@ -2,7 +2,7 @@
 
 namespace App\Logics;
 
-class ActionFail extends Action
+class ActionFail extends AbstractAction
 {
     public function getName(): string
     {

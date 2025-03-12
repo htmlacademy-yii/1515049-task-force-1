@@ -2,7 +2,7 @@
 
 namespace App\Logics;
 
-class ActionCancel extends Action
+class ActionCancel extends AbstractAction
 {
     public function getName(): string
     {

@@ -2,7 +2,7 @@
 
 namespace App\Logics;
 
-class ActionRespond extends Action
+class ActionRespond extends AbstractAction
 {
     public function getName(): string
     {

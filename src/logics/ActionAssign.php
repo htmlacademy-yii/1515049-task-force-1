@@ -2,7 +2,7 @@
 
 namespace App\Logics;
 
-class ActionAssign extends Action
+class ActionAssign extends AbstractAction
 {
     public function getName(): string
     {

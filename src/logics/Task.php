@@ -2,12 +2,16 @@
 
 namespace App\Logics;
 
-/**
- *
- */
+use App\Exceptions\ActionExt;
+use App\Exceptions\RolesExt;
+use App\Exceptions\StatusExc;
 
 class Task
 {
+    // роли пользователей
+    const string ROLE_CUSTOMER = 'customer';
+    const string ROLE_EXECUTOR = 'executor';
+
     // статусы
     const string STATUS_NEW = 'new';
     const string STATUS_CANCELLED = 'cancelled';
@@ -19,11 +23,23 @@ class Task
     private int $customerId;
     private ?int $executorId;
 
-    public function __construct(int $customerId, $currentStatus = self::STATUS_NEW, ?int $executorId = null)
+    public function __construct(int $customerId, string $currentStatus = self::STATUS_NEW, ?int $executorId = null)
     {
         $this->customerId = $customerId;
         $this->currentStatus = $currentStatus;
         $this->executorId = $executorId;
+    }
+
+    /**
+     * @throws RolesExt
+     */
+    public function checkRole(string $role): void
+    {
+        $availableRoles = [self::ROLE_CUSTOMER, self::ROLE_EXECUTOR];
+
+        if (!in_array($role, $availableRoles)) {
+            throw new RolesExt("Неизвестная роль: $role");
+        }
     }
 
     /**
@@ -40,6 +56,17 @@ class Task
             self::STATUS_COMPLETED => 'Выполнено',
             self::STATUS_FAILED => 'Провалено'
         ];
+    }
+
+    /**
+     * @throws StatusExc
+     */
+    public function setStatus(string $status): void {
+        $availableStatuses = [self::STATUS_NEW, self::STATUS_IN_PROGRESS, self::STATUS_COMPLETED, self::STATUS_FAILED, self::STATUS_CANCELLED];
+
+        if (!in_array($status, $availableStatuses)) {
+            throw new StatusExc("Неизвестный статус: $status");
+        }
     }
 
     /**
@@ -61,10 +88,11 @@ class Task
     /**
      * Получение статуса, в который он перейдет после выполнения указанного действия
      *
-     * @param Action $action действие
+     * @param AbstractAction $action действие
      * @return string|null следующий статус или null
+     * @throws \Exception
      */
-    public function getNextStatus(Action $action): ?string
+    public function getNextStatus(AbstractAction $action): ?string
     {
         $transitions = [
             self::STATUS_NEW => [
@@ -78,6 +106,10 @@ class Task
         ];
 
         $actionName = $action->getInternalName();
+
+        if (!isset($transitions[$this->currentStatus][$actionName])) {
+            throw new ActionExt("Действие '$actionName' невозможно в статусе '{$this->currentStatus}'");
+        }
 
         return $transitions[$this->currentStatus][$actionName] ?? null;
     }

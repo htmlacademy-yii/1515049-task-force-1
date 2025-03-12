@@ -2,7 +2,7 @@
 
 namespace App\Logics;
 
-abstract class Action
+abstract class AbstractAction
 {
     /**
      * Название действия
