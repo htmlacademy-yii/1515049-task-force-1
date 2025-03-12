@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Logics;
+namespace App\Actions;
 
-class ActionRespond extends Action
+class ActionRespond extends AbstractAction
 {
     public function getName(): string
     {
@@ -14,7 +14,7 @@ class ActionRespond extends Action
         return "respond";
     }
 
-    public function isAvailable(int $customerId, int $userId, ?int $executorId): bool
+    public function isAvailable(int $userId, int $customerId, ?int $executorId): bool
     {
         return $userId !== $customerId && $executorId === null;
     }

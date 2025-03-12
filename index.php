@@ -2,12 +2,12 @@
 
 require_once 'vendor/autoload.php';
 
-use App\Logics\ActionAssign;
-use App\Logics\ActionCancel;
-use App\Logics\ActionRespond;
-use App\Logics\ActionExecute;
-use App\Logics\ActionFail;
-use App\Logics\Task;
+use App\Actions\ActionAssign;
+use App\Actions\ActionCancel;
+use App\Actions\ActionExecute;
+use App\Actions\ActionFail;
+use App\Actions\ActionRespond;
+use App\Models\Task;
 
 // Тест 1: Задание в статусе "Новое" может быть отменено только автором задания
 $taskNew = new Task(1, Task::STATUS_NEW);

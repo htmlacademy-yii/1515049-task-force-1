@@ -1,6 +1,13 @@
 <?php
 
-namespace App\Logics;
+namespace App\Models;
+
+use App\Actions\AbstractAction;
+use App\Actions\ActionAssign;
+use App\Actions\ActionCancel;
+use App\Actions\ActionExecute;
+use App\Actions\ActionFail;
+use App\Actions\ActionRespond;
 
 /**
  *
@@ -61,10 +68,10 @@ class Task
     /**
      * Получение статуса, в который он перейдет после выполнения указанного действия
      *
-     * @param Action $action действие
+     * @param AbstractAction $action действие
      * @return string|null следующий статус или null
      */
-    public function getNextStatus(Action $action): ?string
+    public function getNextStatus(AbstractAction $action): ?string
     {
         $transitions = [
             self::STATUS_NEW => [

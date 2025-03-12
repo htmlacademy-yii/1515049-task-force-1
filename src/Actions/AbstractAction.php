@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Logics;
+namespace App\Actions;
 
-abstract class Action
+abstract class AbstractAction
 {
     /**
      * Название действия
@@ -26,5 +26,5 @@ abstract class Action
      * @param int $userId текущий пользователь
      * @return bool
      */
-    abstract public function isAvailable(int $customerId, int $userId, ?int $executorId): bool;
+    abstract public function isAvailable(int $userId, int $customerId, ?int $executorId): bool;
 }
