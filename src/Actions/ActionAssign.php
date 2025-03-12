@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Logics;
+namespace App\Actions;
 
 class ActionAssign extends AbstractAction
 {
@@ -14,7 +14,7 @@ class ActionAssign extends AbstractAction
         return "assign";
     }
 
-    public function isAvailable(int $customerId, int $userId, ?int $executorId): bool
+    public function isAvailable(int $userId, int $customerId, ?int $executorId): bool
     {
         return $userId === $customerId;
     }

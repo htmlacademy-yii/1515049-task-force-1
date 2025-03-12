@@ -1,10 +1,17 @@
 <?php
 
-namespace App\Logics;
+namespace App\Models;
 
-use App\Exceptions\ActionExt;
-use App\Exceptions\RolesExt;
-use App\Exceptions\StatusExc;
+use App\Actions\AbstractAction;
+use App\Actions\ActionAssign;
+use App\Actions\ActionCancel;
+use App\Actions\ActionExecute;
+use App\Actions\ActionFail;
+use App\Actions\ActionRespond;
+
+use App\Exceptions\ActionException;
+use App\Exceptions\RolesException;
+use App\Exceptions\StatusException;
 
 class Task
 {
@@ -31,14 +38,14 @@ class Task
     }
 
     /**
-     * @throws RolesExt
+     * @throws RolesException
      */
     public function checkRole(string $role): void
     {
         $availableRoles = [self::ROLE_CUSTOMER, self::ROLE_EXECUTOR];
 
         if (!in_array($role, $availableRoles)) {
-            throw new RolesExt("Неизвестная роль: $role");
+            throw new RolesException("Неизвестная роль: $role");
         }
     }
 
@@ -59,13 +66,13 @@ class Task
     }
 
     /**
-     * @throws StatusExc
+     * @throws StatusException
      */
     public function setStatus(string $status): void {
         $availableStatuses = [self::STATUS_NEW, self::STATUS_IN_PROGRESS, self::STATUS_COMPLETED, self::STATUS_FAILED, self::STATUS_CANCELLED];
 
         if (!in_array($status, $availableStatuses)) {
-            throw new StatusExc("Неизвестный статус: $status");
+            throw new StatusException("Неизвестный статус: $status");
         }
     }
 
@@ -108,7 +115,7 @@ class Task
         $actionName = $action->getInternalName();
 
         if (!isset($transitions[$this->currentStatus][$actionName])) {
-            throw new ActionExt("Действие '$actionName' невозможно в статусе '{$this->currentStatus}'");
+            throw new ActionException("Действие '$actionName' невозможно в статусе '{$this->currentStatus}'");
         }
 
         return $transitions[$this->currentStatus][$actionName] ?? null;
@@ -142,7 +149,7 @@ class Task
         }
 
         return array_filter($actions, function ($action) use ($userId) {
-            return $action->isAvailable($this->customerId, $userId, $this->executorId);
+            return $action->isAvailable($userId, $this->customerId, $this->executorId);
         });
     }
 }

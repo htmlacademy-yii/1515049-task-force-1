@@ -2,14 +2,14 @@
 
 require_once 'vendor/autoload.php';
 
-use App\Exceptions\RolesExt;
-use App\Exceptions\StatusExc;
-use App\Logics\ActionAssign;
-use App\Logics\ActionCancel;
-use App\Logics\ActionRespond;
-use App\Logics\ActionExecute;
-use App\Logics\ActionFail;
-use App\Logics\Task;
+use App\Actions\ActionAssign;
+use App\Actions\ActionCancel;
+use App\Actions\ActionExecute;
+use App\Actions\ActionFail;
+use App\Actions\ActionRespond;
+use App\Models\Task;
+use App\Exceptions\RolesException;
+use App\Exceptions\StatusException;
 
 // Тест 1: Задание в статусе "Новое" может быть отменено только автором задания
 $taskNew = new Task(1, Task::STATUS_NEW);
@@ -56,7 +56,7 @@ $task = new Task(1);
 try {
     $task->checkRole('unknown_role');
     assert(false, 'Ошибка: Ожидалось исключение для неизвестной роли.');
-} catch (RolesExt $e) {
+} catch (RolesException $e) {
     assert($e->getMessage() === 'Неизвестная роль: unknown_role', 'Ошибка: Неверное сообщение исключения для неизвестной роли.');
 }
 
@@ -64,7 +64,7 @@ try {
 try {
     $task->checkRole(Task::ROLE_CUSTOMER);
     assert(true, 'Роль CUSTOMER успешно прошла проверку.');
-} catch (RolesExt $e) {
+} catch (RolesException $e) {
     assert(false, 'Ошибка: Не должно было выбрасываться исключение для корректной роли.');
 }
 
@@ -72,7 +72,7 @@ try {
 try {
     $task->setStatus('invalid_status');
     assert(false, 'Ошибка: Ожидалось исключение для неизвестного статуса.');
-} catch (StatusExc $e) {
+} catch (StatusException $e) {
     assert($e->getMessage() === 'Неизвестный статус: invalid_status', 'Ошибка: Неверное сообщение исключения для неизвестного статуса.');
 }
 
@@ -80,7 +80,7 @@ try {
 try {
     $task->setStatus(Task::STATUS_NEW);
     assert(true, 'Статус NEW успешно установлен.');
-} catch (StatusExc $e) {
+} catch (StatusException $e) {
     assert(false, 'Ошибка: Не должно было выбрасываться исключение для корректного статуса.');
 }
 
