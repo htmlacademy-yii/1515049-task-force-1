@@ -10,6 +10,7 @@ use App\Actions\ActionRespond;
 use App\Models\Task;
 use App\Exceptions\RolesException;
 use App\Exceptions\StatusException;
+use App\CsvConverter\CsvToSqlConverter;
 
 // Тест 1: Задание в статусе "Новое" может быть отменено только автором задания
 $taskNew = new Task(1, Task::STATUS_NEW);
@@ -84,4 +85,12 @@ try {
     assert(false, 'Ошибка: Не должно было выбрасываться исключение для корректного статуса.');
 }
 
-echo "Все тесты пройдены!";
+echo "Все тесты пройдены!\n";
+
+$categoriesConverter = new CsvToSqlConverter('data/categories.csv', 'categories');
+$categoriesConverter->saveToFile('requests/categories.sql');
+
+$citiesConverter = new CsvToSqlConverter('data/cities.csv', 'cities');
+$citiesConverter->saveToFile('requests/cities.sql');
+
+echo "SQL файлы успешно созданы!\n";
