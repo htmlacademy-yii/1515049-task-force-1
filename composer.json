@@ -12,7 +12,6 @@
     }
   ],
   "require": {
-    "php": "^8.3",
-    "ext-cassandra": "*"
+    "php": "^8.3"
   }
 }

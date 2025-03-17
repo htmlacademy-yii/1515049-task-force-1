@@ -4,7 +4,6 @@ namespace App\CsvConverter;
 
 use App\Exceptions\FileFormatException;
 use App\Exceptions\SourceFileException;
-use Cassandra\Exception\RuntimeException;
 use SplFileObject;
 
 class CsvToSqlConverter
@@ -16,7 +15,7 @@ class CsvToSqlConverter
     /**
      * @param string $fileName
      * @param string $tableName
-     * @param array $columns
+     * @throws SourceFileException
      */
     public function __construct(string $fileName, string $tableName)
     {
@@ -35,44 +34,57 @@ class CsvToSqlConverter
 
         $this->columns = $file->fgetcsv(',', '"', '\\');
 
-        if (empty($this->columns)) {
+        if (!$this->columns || empty(array_filter($this->columns))) {
             throw new SourceFileException("Файл не содержит заголовков");
         }
 
         $this->columns = array_map(function ($column) {
-            return preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $column); // Удаляем ZWNBSP и другие невидимые символы
+            return preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $column);
         }, $this->columns);
     }
 
+    /**
+     * @throws FileFormatException
+     */
     public function convert(): string
     {
         $file = new SplFileObject($this->fileName);
         $file->setFlags(SplFileObject::READ_CSV);
 
-        $sql = '';
+        $sql = "-- Дамп для таблицы {$this->tableName}\n\n";
 
         $file->seek(1);
 
         while (!$file->eof()) {
             $data = $file->fgetcsv(',', '"', '\\');
 
-            if ($data && count($data) === count($this->columns)) {
-                $values = array_map(function ($value) {
-                    return "'" . addslashes($value) . "'";
-                }, $data);
-
-                $sql .= sprintf(
-                    "INSERT INTO %s (%s) VALUES (%s);\n",
-                    $this->tableName,
-                    implode(',', $this->columns),
-                    implode(',', $values)
-                );
+            if ($data === false || (count($data) === 1 && $data[0] === null)) {
+                continue;
             }
+
+
+            if (count($data) !== count($this->columns)) {
+                throw new FileFormatException("Ошибка формата файла: количество значений в строке не совпадает с заголовками");
+            }
+
+            $values = array_map(function ($value) {
+                return is_numeric($value) ? $value : "'" . addslashes($value) . "'";
+            }, $data);
+
+            $sql .= sprintf(
+                "INSERT INTO %s (%s) VALUES (%s);\n",
+                $this->tableName,
+                implode(',', $this->columns),
+                implode(',', $values)
+            );
         }
 
         return $sql;
     }
 
+    /**
+     * @throws FileFormatException
+     */
     public function saveToFile(string $outputFile): void
     {
         $sql = $this->convert();
