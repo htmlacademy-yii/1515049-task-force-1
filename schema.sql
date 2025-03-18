@@ -13,7 +13,8 @@ CREATE TABLE cities (
 
 CREATE TABLE categories (
                           id INT AUTO_INCREMENT PRIMARY KEY,
-                          name VARCHAR(255) NOT NULL UNIQUE
+                          name VARCHAR(255) NOT NULL UNIQUE,
+                          icon VARCHAR(50) NULL
 );
 
 CREATE TABLE users (
