@@ -15,19 +15,17 @@ class CsvToSqlConverter
     /**
      * @param string $fileName
      * @param string $tableName
-     * @throws SourceFileException
      */
     public function __construct(string $fileName, string $tableName)
     {
         $this->fileName = $fileName;
         $this->tableName = $tableName;
-        $this->readColumns();
     }
 
     /**
      * @throws SourceFileException
      */
-    private function readColumns(): void
+    private function readColumnHeadings(): void
     {
         $file = new SplFileObject($this->fileName);
         $file->setFlags(SplFileObject::READ_CSV);
@@ -46,7 +44,7 @@ class CsvToSqlConverter
     /**
      * @throws FileFormatException
      */
-    public function convert(): string
+    public function readTableAndConvert(): string
     {
         $file = new SplFileObject($this->fileName);
         $file->setFlags(SplFileObject::READ_CSV);
@@ -85,9 +83,9 @@ class CsvToSqlConverter
     /**
      * @throws FileFormatException
      */
-    public function saveToFile(string $outputFile): void
+    private function saveToFile(string $outputFile): void
     {
-        $sql = $this->convert();
+        $sql = $this->readTableAndConvert();
 
         $directory = dirname($outputFile);
         if (!is_dir($directory)) {
@@ -95,5 +93,15 @@ class CsvToSqlConverter
         }
 
         file_put_contents($outputFile, $sql);
+    }
+
+    /**
+     * @throws SourceFileException
+     * @throws FileFormatException
+     */
+    public function run(string $outputFile): void
+    {
+        $this->readColumnHeadings();
+        $this->saveToFile($outputFile);
     }
 }
