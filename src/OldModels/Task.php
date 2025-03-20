@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\OldModels;
 
 use App\Actions\AbstractAction;
 use App\Actions\ActionAssign;
