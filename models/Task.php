@@ -33,6 +33,9 @@ use yii\db\ActiveRecord;
  */
 class Task extends ActiveRecord
 {
+    public $noResponse;
+    public $noLocation;
+
 
     /**
      * ENUM field values
@@ -100,7 +103,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getCategory()
+    public function getCategory(): ActiveQuery
     {
         return $this->hasOne(Category::class, ['id' => 'category_id']);
     }
@@ -133,6 +136,15 @@ class Task extends ActiveRecord
     public function getExecutor(): ActiveQuery
     {
         return $this->hasOne(User::class, ['id' => 'executor_id']);
+    }
+
+    public function getSearchQuery(): ActiveQuery
+    {
+        $query = self::find();
+        $query->where(['status' => 'new']);
+        $query->andFilterWhere(['category_id' => $this->category_id]);
+
+        if ($this->noLocation)
     }
 
     /**
