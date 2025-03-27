@@ -110,7 +110,6 @@ class Task extends ActiveRecord
     {
         $query = self::find()->where(['status' => self::STATUS_NEW]);
 
-        // Фикс для категорий (работает и с массивами, и с строками вида "1,2,3")
         if (!empty($this->categoryIds)) {
             $categoryIds = is_array($this->categoryIds)
                 ? $this->categoryIds
@@ -121,7 +120,6 @@ class Task extends ActiveRecord
             }
         }
 
-        // Фикс для "Без откликов" (работает даже с пустой таблицей responses)
         if ($this->noResponses) {
             $query->andWhere(['not exists',
                 Response::find()
@@ -129,12 +127,10 @@ class Task extends ActiveRecord
             ]);
         }
 
-        // Фикс для удалённой работы
         if ($this->noLocation) {
             $query->andWhere(['city_id' => null]);
         }
 
-        // Фикс для периода
         if ($this->filterPeriod) {
             $query->andWhere(['>=', 'created_at',
                 date('Y-m-d H:i:s', time() - (int)$this->filterPeriod)
