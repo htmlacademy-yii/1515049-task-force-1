@@ -22,8 +22,8 @@ use yii\helpers\Url;
                 <?= Html::encode($task->description) ?>
             </p>
             <div class="footer-task">
-                <p class="info-text town-text"><?= Html::encode($task->city->name) ?></p>
-                <p class="info-text category-text">Переводы</p>
+                <p class="info-text town-text"><?= ($task->city_id && $task->city) ? Html::encode($task->city->name) : 'Удалённая работа' ?></p>
+                <p class="info-text category-text"><?= $task->category ? Html::encode($task->category->name) : 'Без категории' ?></p>
                 <a href="#" class="button button--black">Смотреть Задание</a>
             </div>
         </div>
