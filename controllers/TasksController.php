@@ -2,20 +2,30 @@
 
 namespace app\controllers;
 
-use yii\web\Controller;
 use app\models\Task;
+use Yii;
+use yii\base\ExitException;
+use yii\web\Controller;
+use app\models\Category;
 
 class TasksController extends Controller
 {
+    /**
+     * @throws ExitException
+     */
     public function actionIndex(): string
     {
-        $
+        $task = new Task();
+        $task->load(Yii::$app->request->post());
 
-        $tasks = Task::find()
-            ->where(['status' => Task::STATUS_NEW])
-            ->orderBy(['created_at' => SORT_DESC])
-            ->all();
-        return $this->render('index', ['tasks' => $tasks]);
+        $categories = Category::find()->all();
+
+        $dataProvider = $task->getDataProvider();
+
+        return $this->render('index', [
+            'categories' => $categories,
+            'dataProvider' => $dataProvider,
+            'task' => $task,
+        ]);
     }
-
 }

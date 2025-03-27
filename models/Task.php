@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -33,9 +34,10 @@ use yii\db\ActiveRecord;
  */
 class Task extends ActiveRecord
 {
-    public $noResponse;
-    public $noLocation;
-
+    public $categoryIds = [];
+    public $noResponses = '0';
+    public $noLocation = '0';
+    public $filterPeriod;
 
     /**
      * ENUM field values
@@ -69,7 +71,10 @@ class Task extends ActiveRecord
             [['ended_at', 'created_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
             ['status', 'in', 'range' => array_keys(self::optsStatus())],
-            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Category::class, 'targetAttribute' => ['category_id' => 'id']],
+            [['category_id'], 'string'],
+            [['categoryIds'], 'each', 'rule' => ['integer']],
+            [['noResponses', 'noLocation'], 'boolean'],
+            [['filterPeriod'], 'integer'],
             [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['city_id' => 'id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['customer_id' => 'id']],
             [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['executor_id' => 'id']],
@@ -99,6 +104,59 @@ class Task extends ActiveRecord
     }
 
     /**
+     * Поиск задач с фильтрами
+     */
+    public function getSearchQuery(): ActiveQuery
+    {
+        $query = self::find()->where(['status' => self::STATUS_NEW]);
+
+        // Фикс для категорий (работает и с массивами, и с строками вида "1,2,3")
+        if (!empty($this->categoryIds)) {
+            $categoryIds = is_array($this->categoryIds)
+                ? $this->categoryIds
+                : array_filter(explode(',', $this->categoryIds));
+
+            if (!empty($categoryIds)) {
+                $query->andWhere(['category_id' => $categoryIds]);
+            }
+        }
+
+        // Фикс для "Без откликов" (работает даже с пустой таблицей responses)
+        if ($this->noResponses) {
+            $query->andWhere(['not exists',
+                Response::find()
+                    ->where('responses.task_id = tasks.id')
+            ]);
+        }
+
+        // Фикс для удалённой работы
+        if ($this->noLocation) {
+            $query->andWhere(['city_id' => null]);
+        }
+
+        // Фикс для периода
+        if ($this->filterPeriod) {
+            $query->andWhere(['>=', 'created_at',
+                date('Y-m-d H:i:s', time() - (int)$this->filterPeriod)
+            ]);
+        }
+
+        return $query->orderBy(['created_at' => SORT_DESC]);
+    }
+
+    /**
+     * Создает DataProvider для использования в GridView/ListView
+     */
+    public function getDataProvider($pageSize = 5): ActiveDataProvider
+    {
+        return new ActiveDataProvider([
+            'query' => $this->getSearchQuery(),
+            'pagination' => ['pageSize' => $pageSize],
+            'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]]
+        ]);
+    }
+
+    /**
      * Gets query for [[Category]].
      *
      * @return ActiveQuery
@@ -106,6 +164,38 @@ class Task extends ActiveRecord
     public function getCategory(): ActiveQuery
     {
         return $this->hasOne(Category::class, ['id' => 'category_id']);
+    }
+
+    /**
+     * Фильтрация по статусу "Новые"
+     */
+    public static function findNewTasks(): ActiveQuery
+    {
+        return self::find()->where(['status' => self::STATUS_NEW]);
+    }
+
+    /**
+     * Фильтрация задач без исполнителя
+     */
+    public static function findWithoutExecutor(): ActiveQuery
+    {
+        return self::find()->where(['executor_id' => null]);
+    }
+
+    /**
+     * Фильтрация задач по периоду
+     */
+    public static function filterByPeriod(ActiveQuery $query, int $hours): ActiveQuery
+    {
+        return $query->andWhere(['>=', 'created_at', time() - $hours * 3600]);
+    }
+
+    /**
+     * Фильтрация по категориям
+     */
+    public static function filterByCategories(ActiveQuery $query, array $categoryIds): ActiveQuery
+    {
+        return $query->andWhere(['category_id' => $categoryIds]);
     }
 
     /**
@@ -136,15 +226,6 @@ class Task extends ActiveRecord
     public function getExecutor(): ActiveQuery
     {
         return $this->hasOne(User::class, ['id' => 'executor_id']);
-    }
-
-    public function getSearchQuery(): ActiveQuery
-    {
-        $query = self::find();
-        $query->where(['status' => 'new']);
-        $query->andFilterWhere(['category_id' => $this->category_id]);
-
-        if ($this->noLocation)
     }
 
     /**
