@@ -7,7 +7,7 @@
     "license": "BSD-3-Clause",
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\": "old/src/"
         }
     },
     "support": {
