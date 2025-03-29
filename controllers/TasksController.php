@@ -34,7 +34,7 @@ class TasksController extends Controller
      * @return string
      * @throws NotFoundHttpException
      * @used-by \app\config\web::urlManager Правила маршрутизации
-     * @used-by \app\views\tasks\_list.php Ссылки в списке задач
+     * @used-by \app\views\tasks\_task-list.php Ссылки в списке задач
      */
     public function actionView(int $id): string
     {

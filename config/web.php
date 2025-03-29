@@ -55,7 +55,7 @@ $config = [
             'rules' => [
                 'tasks' => 'tasks/index',
                 'tasks/view/<id:\d+>' => 'tasks/view',
-                'user/view/<id:\d+>' => 'users/view',
+                'users/view/<id:\d+>' => 'users/view',
             ],
         ],
     ],

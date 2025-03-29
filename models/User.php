@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
+use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -149,7 +150,7 @@ class User extends ActiveRecord
         ];
     }
 
-    protected function calculateExecutorRating(): float|int
+    public function calculateExecutorRating(): float|int
     {
         return (float)$this->getExecutorReviews()->average('rating') ?: 0;
     }
@@ -163,7 +164,6 @@ class User extends ActiveRecord
             $this->updateAttributes(['executor_rating', 'executor_reviews_count']);
         }
     }
-
 
     /**
      * Gets query for [[Categories]].
