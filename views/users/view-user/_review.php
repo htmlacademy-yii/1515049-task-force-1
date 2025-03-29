@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Task;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -9,7 +10,8 @@ use yii\helpers\Url;
     <img class="customer-photo" src="<?= Url::to('@web/img/' . $model->task->customer->avatar) ?>" width="120" height="127" alt="Фото заказчика">
     <div class="feedback-wrapper">
         <p class="feedback">«<?= Html::encode($model->comment) ?>»</p>
-        <p class="task">Задание «<a href="#" class="link link--small"><?= Html::encode($model->task->title) ?></a>» выполнено</p>
+        <p class="task">Задание «<a href="<?= Url::to(['tasks/view', 'id' => $model->task->id]) ?>" class="link link--small"><?= Html::encode($model->task->title) ?></a>»
+            <?= Html::encode(Task::getStatusLabels()[$model->task->status] ?? $model->task->status) ?></p>
     </div>
     <div class="feedback-wrapper">
         <div class="stars-rating small">

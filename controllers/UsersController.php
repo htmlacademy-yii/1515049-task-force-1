@@ -16,7 +16,10 @@ class UsersController extends Controller
      * @throws NotFoundHttpException
      */
     public function actionView(int $id): string {
-        $user = User::findOne($id);
+        $user = User::find()
+            ->with(['city', 'categories'])
+            ->where(['id' => $id, 'role' => User::ROLE_EXECUTOR])
+            ->one();
 
         if (!$user || $user->role !== User::ROLE_EXECUTOR) {
             throw new NotFoundHttpException("Исполнитель не найден");
@@ -38,7 +41,7 @@ class UsersController extends Controller
             ->where(['executor_id' => $id, 'status' => Task::STATUS_FAILED])
             ->count();
 
-        return $this->render('view/view', [
+        return $this->render('view-user/view', [
             'user' => $user,
             'completedTasks' => $completedTasks,
             'failedTasks' => $failedTasks,

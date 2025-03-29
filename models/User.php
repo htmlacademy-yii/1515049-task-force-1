@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use DateTime;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
@@ -184,6 +185,19 @@ class User extends ActiveRecord
     public function getCity(): ActiveQuery
     {
         return $this->hasOne(City::class, ['id' => 'city_id']);
+    }
+
+    public function getAge(): ?int
+    {
+        if (empty($this->birthday)) {
+            return null;
+        }
+
+        $birthday = new DateTime($this->birthday);
+        $today = new DateTime();
+        $interval = $today->diff($birthday);
+
+        return $interval->y;
     }
 
     /**
