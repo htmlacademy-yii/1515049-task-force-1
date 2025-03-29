@@ -3,7 +3,7 @@
 
 use yii\helpers\Html; ?>
 
-
+<?php if ($user->show_contacts): ?>
 <div class="right-card white">
     <h4 class="head-card">Контакты</h4>
     <ul class="enumeration-list">
@@ -25,3 +25,4 @@ use yii\helpers\Html; ?>
         endif; ?>
     </ul>
 </div>
+<?php endif; ?>

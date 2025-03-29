@@ -26,6 +26,7 @@ use yii\db\ActiveRecord;
  * @property string|null $birthday
  * @property string|null $info
  * @property string|null $created_at
+ * @property int $accepts_orders
  *
  * @property Category[] $category
  * @property City $city
@@ -65,6 +66,7 @@ class User extends ActiveRecord
             [['show_contacts', 'executor_reviews_count'], 'default', 'value' => 0],
             [['executor_rating'], 'default', 'value' => 0.00],
             [['name', 'email', 'password_hash', 'role'], 'required'],
+            [['accepts_orders'], 'boolean'],
             [['role', 'info'], 'string'],
             [['city_id', 'show_contacts', 'executor_reviews_count'], 'integer'],
             [['birthday', 'created_at'], 'safe'],
@@ -92,6 +94,7 @@ class User extends ActiveRecord
             'city_id' => 'City ID',
             'avatar' => 'Avatar',
             'telegram' => 'Telegram',
+            'accepts_orders' => 'Is accept',
             'phone' => 'Phone',
             'show_contacts' => 'Show Contacts',
             'birthday' => 'Birthday',

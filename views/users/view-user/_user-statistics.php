@@ -16,6 +16,6 @@
         <dt>Дата регистрации</dt>
         <dd><?= Yii::$app->formatter->asDate($user->created_at, 'long') ?></dd>
         <dt>Статус</dt>
-        <dd><?= $user->show_contacts ? 'Открыт для новых заказов' : 'Не принимает заказы' ?></dd>
+        <dd><?= $user->accepts_orders ? 'Открыт для новых заказов' : 'Не принимает заказы' ?></dd>
     </dl>
 </div>
