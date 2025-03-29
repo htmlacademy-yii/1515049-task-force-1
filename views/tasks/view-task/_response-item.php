@@ -21,7 +21,7 @@ use yii\helpers\Url;
                 <?= str_repeat('<span class="fill-star">&nbsp;</span>', round($model->executor->executorRating)) ?>
                 <?= str_repeat('<span>&nbsp;</span>', 5 - round($model->executor->executorRating)) ?>
             </div>
-            <p class="reviews"><?= $model->executor->reviews_count ?? 0 ?></p>
+            <p class="reviews"><?= $model->executor->executor_reviews_count ?></p>
         </div>
         <p class="response-message">
             <?= Html::encode($model->comment) ?>

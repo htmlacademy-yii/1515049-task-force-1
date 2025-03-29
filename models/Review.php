@@ -66,6 +66,24 @@ class Review extends ActiveRecord
         ];
     }
 
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($this->executor) {
+            $this->executor->updateExecutorStars();
+        }
+    }
+
+    public function afterDelete()
+    {
+        parent::afterDelete();
+
+        if ($this->executor) {
+            $this->executor->updateExecutorStars();
+        }
+    }
+
     /**
      * Gets query for [[Customer]].
      *

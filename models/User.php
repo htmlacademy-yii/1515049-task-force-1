@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -32,6 +33,8 @@ use yii\db\ActiveRecord;
  * @property Task[] $task
  * @property Task[] $task0
  * @property UserSpecialization[] $userSpecialization
+ * @property float|int $executor_rating
+ * @property int $executor_reviews_count
  */
 class User extends ActiveRecord
 {
@@ -57,13 +60,16 @@ class User extends ActiveRecord
     {
         return [
             [['city_id', 'avatar', 'telegram', 'phone', 'birthday', 'info'], 'default', 'value' => null],
-            [['show_contacts'], 'default', 'value' => 1],
+            [['show_contacts', 'executor_reviews_count'], 'default', 'value' => 0],
+            [['executor_rating'], 'default', 'value' => 0.00],
             [['name', 'email', 'password_hash', 'role'], 'required'],
             [['role', 'info'], 'string'],
-            [['city_id', 'show_contacts'], 'integer'],
+            [['city_id', 'show_contacts', 'executor_reviews_count'], 'integer'],
             [['birthday', 'created_at'], 'safe'],
             [['name', 'email', 'password_hash', 'avatar', 'telegram'], 'string', 'max' => 255],
             [['phone'], 'string', 'max' => 20],
+            [['executor_rating'], 'number', 'min' => 0, 'max' => 5],
+            [['executor_rating'], 'default', 'value' => 0],
             ['role', 'in', 'range' => array_keys(self::optsRole())],
             [['email'], 'unique'],
             [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['city_id' => 'id']],
@@ -89,6 +95,8 @@ class User extends ActiveRecord
             'birthday' => 'Birthday',
             'info' => 'Info',
             'created_at' => 'Created At',
+            'executor_rating' => 'Рейтинг исполнителя',
+            'executor_reviews_count' => 'Количество отзывов',
         ];
     }
 
@@ -118,6 +126,44 @@ class User extends ActiveRecord
     {
         return $this->hasMany(Review::class, ['executor_id' => 'id']);
     }
+
+    public function behaviors(): array
+    {
+        return [
+            [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_AFTER_INSERT => ['executor_rating', 'executor_reviews_count'],
+                    ActiveRecord::EVENT_AFTER_UPDATE => ['executor_rating', 'executor_reviews_count'],
+                ],
+                'value' => function ($event) {
+                    if ($this->role === self::ROLE_EXECUTOR) {
+                        return [
+                            'executor_rating' => $this->calculateExecutorRating(),
+                            'executor_reviews_count' => $this->getExecutorReviews()->count(),
+                        ];
+                    }
+                    return null;
+                }
+            ]
+        ];
+    }
+
+    protected function calculateExecutorRating(): float|int
+    {
+        return (float)$this->getExecutorReviews()->average('rating') ?: 0;
+    }
+
+    public function updateExecutorStars(): void
+    {
+        if ($this->role === self::ROLE_EXECUTOR) {
+            $this->executor_rating = $this->calculateExecutorRating();
+            $this->executor_reviews_count = $this->getExecutorReviews()->count();
+
+            $this->updateAttributes(['executor_rating', 'executor_reviews_count']);
+        }
+    }
+
 
     /**
      * Gets query for [[Categories]].
