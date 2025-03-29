@@ -93,12 +93,39 @@ class User extends ActiveRecord
     }
 
     /**
+     * Gets average rating from executor reviews
+     * @return float
+     */
+    public function getExecutorRating(): float
+    {
+        return (float)$this->getExecutorReviews()->average('rating') ?: 0;
+    }
+
+    /**
+     * Gets count of executor reviews
+     * @return int
+     */
+    public function getExecutorReviewsCount(): int
+    {
+        return $this->getExecutorReviews()->count();
+    }
+
+    /**
+     * Gets query for executor reviews (Review0 relation alias)
+     * @return ActiveQuery
+     */
+    public function getExecutorReviews(): ActiveQuery
+    {
+        return $this->hasMany(Review::class, ['executor_id' => 'id']);
+    }
+
+    /**
      * Gets query for [[Categories]].
      *
      * @return ActiveQuery
      * @throws InvalidConfigException
      */
-    public function getCategories()
+    public function getCategories(): ActiveQuery
     {
         return $this->hasMany(Category::class, ['id' => 'category_id'])->viaTable('user_specializations', ['user_id' => 'id']);
     }

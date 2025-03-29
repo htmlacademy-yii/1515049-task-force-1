@@ -104,6 +104,28 @@ class Task extends ActiveRecord
     }
 
     /**
+     * @return array
+     */
+    public static function getStatusLabels(): array
+    {
+        return [
+            self::STATUS_NEW => 'Новое',
+            self::STATUS_IN_PROGRESS => 'В работе',
+            self::STATUS_COMPLETED => 'Выполнено',
+            self::STATUS_FAILED => 'Провалено',
+            self::STATUS_CANCELED => 'Отменено'
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatusLabel(): string
+    {
+        return self::getStatusLabels()[$this->status] ?? $this->status;
+    }
+
+    /**
      * Поиск задач с фильтрами
      */
     public function getSearchQuery(): ActiveQuery
