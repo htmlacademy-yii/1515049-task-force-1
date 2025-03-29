@@ -10,7 +10,7 @@ use yii\helpers\Url;
 ?>
 
 <div class="response-card">
-    <img class="customer-photo" src="<?= Url::to($model->user->photo ?? '@web/img/no-avatar.png') ?>" width="146" height="156"
+    <img class="customer-photo" src="<?= Url::to('@web/img/' . $model->executor->avatar) ?>" width="146" height="156"
          alt="Фото заказчиков">
     <div class="feedback-wrapper">
         <a href="<?= Url::to(['users/view', 'id' => $model->executor->id]) ?>" class="link link--block link--big"><?= Html::encode(
