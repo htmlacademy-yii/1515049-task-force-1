@@ -3,10 +3,10 @@
 
 /** @var Response $model */
 
+use app\custom_components\StarRatingWidget\StarRatingWidget;
 use app\models\Response;
 use yii\helpers\Html;
 use yii\helpers\Url;
-
 ?>
 
 <div class="response-card">
@@ -17,10 +17,9 @@ use yii\helpers\Url;
                 $model->executor->name
             ) ?></a>
         <div class="response-wrapper">
-            <div class="stars-rating small">
-                <?= str_repeat('<span class="fill-star">&nbsp;</span>', round($model->executor->executorRating)) ?>
-                <?= str_repeat('<span>&nbsp;</span>', 5 - round($model->executor->executorRating)) ?>
-            </div>
+            <?= StarRatingWidget::widget(
+                ['rating' => $model->executor->calculateExecutorRating(), 'wrapperClass' => 'stars-rating small',]
+            ) ?>
             <p class="reviews"><?= $model->executor->executor_reviews_count ?></p>
         </div>
         <p class="response-message">

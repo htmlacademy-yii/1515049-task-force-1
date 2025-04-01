@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use DateMalformedStringException;
 use DateTime;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -111,16 +112,8 @@ class User extends ActiveRecord
     }
 
     /**
-     * Gets average rating from executor reviews
-     * @return float
-     */
-    public function getExecutorRating(): float
-    {
-        return (float)$this->getExecutorReviews()->average('rating') ?: 0;
-    }
-
-    /**
-     * Gets count of executor reviews
+     * Рассчитывает количество отзывов исполнителя
+     *
      * @return int
      */
     public function getExecutorReviewsCount(): int
@@ -129,7 +122,8 @@ class User extends ActiveRecord
     }
 
     /**
-     * Gets query for executor reviews (Review0 relation alias)
+     * Получает отзывы исполнителя
+     *
      * @return ActiveQuery
      */
     public function getExecutorReviews(): ActiveQuery
@@ -137,6 +131,23 @@ class User extends ActiveRecord
         return $this->hasMany(Review::class, ['executor_id' => 'id']);
     }
 
+    /**
+     * Определяет поведения модели.
+     *
+     * Добавляет автоматическое обновление рейтинга исполнителя и количества отзывов:
+     * - При создании (EVENT_AFTER_INSERT)
+     * - При обновлении (EVENT_AFTER_UPDATE)
+     *
+     * @return array Конфигурация поведений модели
+     *
+     * @uses calculateExecutorRating() Для расчёта текущего рейтинга исполнителя
+     * @uses getExecutorReviews() Для получения связанных отзывов
+     *
+     * @example
+     * При изменении статуса задания или добавлении отзыва автоматически
+     * пересчитывает рейтинг исполнителя по формуле:
+     * сумма оценок / (количество отзывов + проваленные задания)
+     */
     public function behaviors(): array
     {
         return [
@@ -159,23 +170,38 @@ class User extends ActiveRecord
         ];
     }
 
+    /**
+     * Рассчитывает рейтинг исполнителя
+     *
+     * @return float|int
+     */
     public function calculateExecutorRating(): float|int
     {
-        return (float)$this->getExecutorReviews()->average('rating') ?: 0;
+        $totalRating = (float)$this->getExecutorReviews()->sum('rating');
+        $reviewCount = (int)$this->getExecutorReviewsCount();
+        $failedTasksCount = (int)$this->getFailedTasks()->count();
+
+        return ($reviewCount + $failedTasksCount) > 0 ? $totalRating / ($reviewCount + $failedTasksCount) : 0;
     }
 
+
+    /**
+     * Обновляет вычисляемые значения в базе данных
+     *
+     * @return void
+     */
     public function updateExecutorStars(): void
     {
         if ($this->role === self::ROLE_EXECUTOR) {
             $this->executor_rating = $this->calculateExecutorRating();
-            $this->executor_reviews_count = $this->getExecutorReviews()->count();
+            $this->executor_reviews_count = $this->getExecutorReviewsCount();
 
             $this->updateAttributes(['executor_rating', 'executor_reviews_count']);
         }
     }
 
     /**
-     * Gets query for [[Categories]].
+     * Получает категории
      *
      * @return ActiveQuery
      * @throws InvalidConfigException
@@ -186,7 +212,7 @@ class User extends ActiveRecord
     }
 
     /**
-     * Gets query for [[City]].
+     * Получает id города пользователя
      *
      * @return ActiveQuery
      */
@@ -196,7 +222,9 @@ class User extends ActiveRecord
     }
 
     /**
-     * @throws \DateMalformedStringException
+     * Получает возраст пользователя
+     *
+     * @throws DateMalformedStringException
      */
     public function getAge(): ?int
     {
@@ -212,7 +240,7 @@ class User extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Responses]].
+     * Получает отклики исполнителя
      *
      * @return ActiveQuery
      */
@@ -222,7 +250,7 @@ class User extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Reviews]].
+     * Получает отзывы заказчика
      *
      * @return ActiveQuery
      */
@@ -233,7 +261,7 @@ class User extends ActiveRecord
 
 
     /**
-     * Gets query for [[Tasks]].
+     * Получает задания заказчика
      *
      * @return ActiveQuery
      */
@@ -243,7 +271,7 @@ class User extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Tasks0]].
+     * Получает задания исполнителя
      *
      * @return ActiveQuery
      */
@@ -253,7 +281,7 @@ class User extends ActiveRecord
     }
 
     /**
-     * Gets query for [[UserSpecializations]].
+     * Получает специализации пользователя
      *
      * @return ActiveQuery
      */
@@ -264,6 +292,8 @@ class User extends ActiveRecord
 
 
     /**
+     *Возвращает массив доступных ролей пользователя
+     *
      * column role ENUM value labels
      * @return string[]
      */
@@ -276,6 +306,8 @@ class User extends ActiveRecord
     }
 
     /**
+     * Возвращает текстовое представление роли текущего пользователя
+     *
      * @return string
      */
     public function displayRole(): string
@@ -284,6 +316,8 @@ class User extends ActiveRecord
     }
 
     /**
+     * Проверяет, является ли пользователь заказчиком
+     *
      * @return bool
      */
     public function isRoleCustomer(): bool
@@ -291,12 +325,19 @@ class User extends ActiveRecord
         return $this->role === self::ROLE_CUSTOMER;
     }
 
+    /**
+     * Устанавливает роль "Заказчик" для текущего пользователя
+     *
+     * @return void
+     */
     public function setRoleToCustomer(): void
     {
         $this->role = self::ROLE_CUSTOMER;
     }
 
     /**
+     * Проверяет, является ли пользователь исполнителем
+     *
      * @return bool
      */
     public function isRoleExecutor(): bool
@@ -304,8 +345,24 @@ class User extends ActiveRecord
         return $this->role === self::ROLE_EXECUTOR;
     }
 
+    /**
+     * Устанавливает роль "Исполнитель" для текущего пользователя.
+     *
+     * @return void
+     */
     public function setRoleToExecutor(): void
     {
         $this->role = self::ROLE_EXECUTOR;
+    }
+
+    /**
+     * Получает проваленные задания у исполнителя
+     *
+     * @return ActiveQuery
+     */
+    private function getFailedTasks(): ActiveQuery
+    {
+        return $this->hasMany(Task::class, ['executor_id' => 'id'])
+            ->andWhere(['status' => Task::STATUS_FAILED]);
     }
 }
