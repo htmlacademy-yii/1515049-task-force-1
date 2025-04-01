@@ -9,8 +9,8 @@ use yii\widgets\ListView;
     'dataProvider' => $reviewsDataProvider,
     'itemView' => '_review',
     'layout' => "{items}\n{pager}",
-    'options' => ['class' => 'responses-list'],
-    'itemOptions' => ['class' => 'response-card'],
+    'options' => ['tag' => false],
+    'itemOptions' => ['tag' => false],
     'emptyText' => 'Пока нет отзывов',
     'pager' => [
         'options' => ['class' => 'pagination-list'],

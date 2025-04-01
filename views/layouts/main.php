@@ -79,10 +79,7 @@ $this->beginBody() ?>
             </div>
         </div>
     </header>
-
-    <div class="main-container">
         <?= $content ?>
-    </div>
 </div>
 
 <?php

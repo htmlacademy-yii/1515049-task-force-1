@@ -37,6 +37,11 @@ use yii\db\ActiveRecord;
  * @property Task[] $task0
  * @property UserSpecialization[] $userSpecialization
  * @property float|int $executor_rating
+ * @property-read null|int $age
+ * @property-read int $executorReviewsCount
+ * @property-read ActiveQuery $categories
+ * @property-read ActiveQuery $executorReviews
+ * @property-read float $executorRating
  * @property int $executor_reviews_count
  */
 class User extends ActiveRecord
@@ -190,6 +195,9 @@ class User extends ActiveRecord
         return $this->hasOne(City::class, ['id' => 'city_id']);
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     public function getAge(): ?int
     {
         if (empty($this->birthday)) {
@@ -208,7 +216,7 @@ class User extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getResponse(): ActiveQuery
+    public function getResponses(): ActiveQuery
     {
         return $this->hasMany(Response::class, ['executor_id' => 'id']);
     }
@@ -218,27 +226,18 @@ class User extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getReview(): ActiveQuery
+    public function getReviews(): ActiveQuery
     {
         return $this->hasMany(Review::class, ['customer_id' => 'id']);
     }
 
-    /**
-     * Gets query for [[Reviews0]].
-     *
-     * @return ActiveQuery
-     */
-    public function getReview0(): ActiveQuery
-    {
-        return $this->hasMany(Review::class, ['executor_id' => 'id']);
-    }
 
     /**
      * Gets query for [[Tasks]].
      *
      * @return ActiveQuery
      */
-    public function getTask(): ActiveQuery
+    public function getTasks(): ActiveQuery
     {
         return $this->hasMany(Task::class, ['customer_id' => 'id']);
     }
@@ -248,7 +247,7 @@ class User extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getTask0(): ActiveQuery
+    public function getExecutorTasks(): ActiveQuery
     {
         return $this->hasMany(Task::class, ['executor_id' => 'id']);
     }
@@ -258,7 +257,7 @@ class User extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getUserSpecialization(): ActiveQuery
+    public function getUserSpecializations(): ActiveQuery
     {
         return $this->hasMany(UserSpecialization::class, ['user_id' => 'id']);
     }

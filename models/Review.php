@@ -66,7 +66,7 @@ class Review extends ActiveRecord
         ];
     }
 
-    public function afterSave($insert, $changedAttributes)
+    public function afterSave($insert, $changedAttributes): void
     {
         parent::afterSave($insert, $changedAttributes);
 
@@ -75,7 +75,7 @@ class Review extends ActiveRecord
         }
     }
 
-    public function afterDelete()
+    public function afterDelete(): void
     {
         parent::afterDelete();
 

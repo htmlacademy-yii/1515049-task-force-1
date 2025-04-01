@@ -2,7 +2,7 @@
 
 use yii\db\Migration;
 
-class m250329_130709_add_executor_stats_fields extends Migration
+class m250329_094130_add_executor_stats_fields extends Migration
 {
     /**
      * {@inheritdoc}

@@ -251,7 +251,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getFile(): ActiveQuery
+    public function getFiles(): ActiveQuery
     {
         return $this->hasMany(File::class, ['task_id' => 'id']);
     }
@@ -261,7 +261,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getResponse(): ActiveQuery
+    public function getResponses(): ActiveQuery
     {
         return $this->hasMany(Response::class, ['task_id' => 'id']);
     }
@@ -271,7 +271,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getReview(): ActiveQuery
+    public function getReviews(): ActiveQuery
     {
         return $this->hasMany(Review::class, ['task_id' => 'id']);
     }
