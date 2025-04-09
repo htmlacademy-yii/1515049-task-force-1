@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\handlers\UserAfterSaveHandler;
 use DateMalformedStringException;
 use DateTime;
 use Yii;
@@ -129,14 +130,13 @@ class User extends ActiveRecord implements IdentityInterface
         return $this->hasMany(Review::class, ['executor_id' => 'id']);
     }
 
-    // оптимизация вместо behaviors
-    public function afterSave($insert, $changedAttributes): void
+    public function behaviors(): array
     {
-        parent::afterSave($insert, $changedAttributes);
-
-        if ($this->role === self::ROLE_EXECUTOR) {
-            $this->updateExecutorStars();
-        }
+        return [
+            'afterSaveHandler' => [
+                'class' => UserAfterSaveHandler::class,
+            ],
+        ];
     }
 
     /**
@@ -169,6 +169,26 @@ class User extends ActiveRecord implements IdentityInterface
         return ($reviewCount + $failedTasksCount) > 0 ? $totalRating / ($reviewCount + $failedTasksCount) : 0;
     }
 
+    /**
+     * Возвращает место в рейтинге среди исполнителей
+     * @return int
+     */
+    public function getExecutorRank(): int
+    {
+        $subQuery = self::find()
+            ->select(['id', 'executor_rating'])
+            ->where(['role' => self::ROLE_EXECUTOR])
+            ->andWhere(['not', ['executor_rating' => null]])
+            ->orderBy(['executor_rating' => SORT_DESC]);
+
+        $rank = (new \yii\db\Query())
+            ->select(['rank' => 'COUNT(*) + 1'])
+            ->from(['u' => $subQuery])
+            ->where(['>', 'u.executor_rating', $this->executor_rating])
+            ->scalar();
+
+        return $rank ?: 1;
+    }
 
     /**
      * Обновляет вычисляемые значения в базе данных
