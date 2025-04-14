@@ -5,6 +5,7 @@
 /** @var $cities */
 
 use app\models\User;
+use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 $this->title = 'Регистрация';
@@ -14,28 +15,27 @@ $this->title = 'Регистрация';
     <div class="center-block">
         <div class="registration-form regular-form">
             <?php
-            $form = ActiveForm::begin() ?>
+            $form = ActiveForm::begin([
+                'fieldConfig' => [
+                    'template' => "{label}\n{input}\n{error}",
+                    'errorOptions' => ['tag' => 'span', 'class' => 'help-block'],
+                ],
+            ]) ?>
             <h3 class="head-main head-task">Регистрация нового пользователя</h3>
-            <div class="form-group">
-                <?= $form->field($model, 'name')
-                    ->textInput(['id' => 'username']) ?>
-            </div>
+            <?= $form->field($model, 'name')
+                ->textInput(['id' => 'username']) ?>
 
             <div class="half-wrapper">
-                <div class="form-group">
-                    <?= $form->field($model, 'email')
-                        ->input('email', ['id' => 'email-user']) ?>
-                </div>
-                <div class="form-group">
-                    <?= $form->field($model, 'city')->dropDownList(
-                        $cities,
-                        [
-                            'prompt' => 'Выберите город',
-                            'id' => 'town-user',
-                            'class' => 'form-control'
-                        ]
-                    ) ?>
-                </div>
+                <?= $form->field($model, 'email')
+                    ->input('email', ['id' => 'email-user']) ?>
+                <?= $form->field($model, 'city')->dropDownList(
+                    $cities,
+                    [
+                        'prompt' => 'Выберите город',
+                        'id' => 'town-user',
+                        'class' => 'form-control'
+                    ]
+                ) ?>
             </div>
 
             <div class="half-wrapper">
@@ -46,22 +46,21 @@ $this->title = 'Регистрация';
             </div>
 
             <div class="half-wrapper">
-                <div class="form-group">
-                    <?= $form->field($model, 'password_repeat')
-                        ->passwordInput(['id' => 'password-repeat-user']) ?>
-                </div>
+                <?= $form->field($model, 'password_repeat')
+                    ->passwordInput(['id' => 'password-repeat-user']) ?>
             </div>
+            <?= $form->field($model, 'is_executor', [
+                'options' => ['tag' => false],
+                'template' => "<label class=\"control-label checkbox-label\">{input} {label}</label>\n{error}",
+            ])->checkbox(['id' => 'response-user'], false) ?>
 
-            <div class="form-group">
-                <?= $form->field($model, 'is_executor', [
-                    'options' => ['tag' => false],
-                    'template' => "<label class=\"control-label checkbox-label\">{input} {label}</label>\n{error}",
-                ])->checkbox(['id' => 'response-user'], false) ?>
-            </div>
+            <?= Html::submitInput(
+                'Создать аккаунт',
+                ['class' => 'button button--blue']
+            ) ?>
 
-            <input type="submit" class="button button--blue" value="Создать аккаунт">
-
-            <?php ActiveForm::end() ?>
+            <?php
+            ActiveForm::end() ?>
         </div>
     </div>
 </main>
