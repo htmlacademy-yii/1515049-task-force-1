@@ -12,6 +12,11 @@ $this->title = 'Регистрация';
 
 ?>
 <main class="container container--registration">
+    <style>
+        .help-block:empty {
+            display: none;
+        }
+    </style>
     <div class="center-block">
         <div class="registration-form regular-form">
             <?php
@@ -49,10 +54,12 @@ $this->title = 'Регистрация';
                 <?= $form->field($model, 'password_repeat')
                     ->passwordInput(['id' => 'password-repeat-user']) ?>
             </div>
-            <?= $form->field($model, 'is_executor', [
-                'options' => ['tag' => false],
-                'template' => "<label class=\"control-label checkbox-label\">{input} {label}</label>\n{error}",
-            ])->checkbox(['id' => 'response-user'], false) ?>
+            <div class="form-group">
+                <?= $form->field($model, 'is_executor', [
+                    'options' => ['tag' => false],
+                    'template' => '<label class="control-label checkbox-label">{input} Я собираюсь откликаться на заказы</label>{error}',
+                ])->checkbox(['id' => 'response-user'], false) ?>
+            </div>
 
             <?= Html::submitInput(
                 'Создать аккаунт',
