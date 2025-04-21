@@ -66,7 +66,7 @@ $this->beginBody() ?>
         <?php $user = Yii::$app->user->identity; ?>
         <div class="user-block">
             <a href="#">
-                <img class="user-photo" src="<?= $user->avatar; ?>" width="55" height="55" alt="Аватар">
+                <img class="user-photo" src="/img/<?= $user->avatar; ?>" width="55" height="55" alt="Аватар">
             </a>
             <div class="user-menu">
                 <p class="user-name"><?=$user->name?></p>
