@@ -4,10 +4,8 @@ namespace app\controllers;
 
 use yii\filters\AccessControl;
 use yii\web\Controller;
-use yii\web\Response;
-use app\models\LoginForm;
 
-class SiteController extends Controller
+class SecuredController extends Controller
 {
     public function behaviors(): array
     {
@@ -17,20 +15,10 @@ class SiteController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['?'],
+                        'roles' => ['@'],
                     ]
                 ]
             ]
         ];
-    }
-
-    /**
-     * Главная страница (лендинг)
-     */
-    public function actionIndex(): Response|string
-    {
-        $this->layout = 'landing';
-
-        return $this->render('index', ['model' => new LoginForm()]);
     }
 }
