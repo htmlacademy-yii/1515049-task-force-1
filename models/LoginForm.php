@@ -14,6 +14,7 @@ class LoginForm extends Model
     public $password;
 
     private $_user;
+
     public function rules(): array
     {
         return [

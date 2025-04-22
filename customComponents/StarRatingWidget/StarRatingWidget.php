@@ -31,6 +31,7 @@ class StarRatingWidget extends Widget
         parent::init();
         $this->rating = min(max($this->rating, 0), self::MAX_RATING); // ограничение рейтинга в пределах от 0 до MAX_RATING
     }
+
     public function run()
     {
         $fullStars = floor($this->rating); // кол-во закрашенных звезд
