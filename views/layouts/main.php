@@ -7,6 +7,7 @@
 use app\assets\AppAsset;
 use yii\bootstrap5\Html;
 use yii\helpers\Url;
+use yii\web\JqueryAsset;
 
 AppAsset::register($this);
 
@@ -20,6 +21,8 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 $this->registerCssFile('@web/css/normalize.css');
 $this->registerCssFile('@web/css/style.css');
 $this->registerCssFile('@web/css/site.css');
+
+$this->registerJsFile('@web/js/main.js', ['depends' => [JqueryAsset::class]]);
 ?>
 <?php
 $this->beginPage() ?>
@@ -60,12 +63,13 @@ $this->beginBody() ?>
             <?php endif; ?>
         </nav>
         <?php if (Yii::$app->controller->id !== 'signup'): ?>
+        <?php $user = Yii::$app->user->identity; ?>
         <div class="user-block">
             <a href="#">
-                <img class="user-photo" src="<?= Url::to('@web/img/man-glasses.png') ?>" width="55" height="55" alt="Аватар">
+                <img class="user-photo" src="/img/<?= $user->avatar; ?>" width="55" height="55" alt="Аватар">
             </a>
             <div class="user-menu">
-                <p class="user-name">Василий</p>
+                <p class="user-name"><?=$user->name?></p>
                 <div class="popup-head">
                     <ul class="popup-menu">
                         <li class="menu-item">
@@ -75,7 +79,7 @@ $this->beginBody() ?>
                             <a href="#" class="link">Связаться с нами</a>
                         </li>
                         <li class="menu-item">
-                            <a href="#" class="link">Выход из системы</a>
+                            <a href="<?=Url::toRoute(['auth/logout']); ?>" class="link">Выход из системы</a>
                         </li>
                     </ul>
                 </div>

@@ -29,6 +29,7 @@ $config = [
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
+            'loginUrl' => ['site/index'],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
@@ -57,6 +58,8 @@ $config = [
                 'tasks/view/<id:\d+>' => 'tasks/view',
                 'users/view/<id:\d+>' => 'users/view',
                 'signup' => 'signup/index',
+                'login' => 'auth/login',
+                'logout' => 'auth/logout',
             ],
         ],
     ],

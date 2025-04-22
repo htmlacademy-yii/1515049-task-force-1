@@ -6,11 +6,10 @@ use app\models\Response;
 use app\models\Task;
 use Yii;
 use yii\data\ActiveDataProvider;
-use yii\web\Controller;
 use app\models\Category;
 use yii\web\NotFoundHttpException;
 
-class TasksController extends Controller
+class TasksController extends SecuredController
 {
     public function actionIndex(): string
     {
