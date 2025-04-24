@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\interfaces\FilesUploadInterface;
 use app\models\Response;
 use app\models\Task;
 use Yii;
@@ -10,10 +11,28 @@ use app\models\Category;
 use yii\web\NotFoundHttpException;
 
 class TasksController extends SecuredController
+// [!] АВТОРСКИЙ КОД [!]
+    // Student: Романова Наталья
+    // Course: Профессия "PHP-разработчик#1"
+    // Task: модуль 2, задание module7-task2
+    // изменено 24.04.2025
 {
+    private FilesUploadInterface $fileUploader;
+
+    public function __construct(
+        $id,
+        $module,
+        FilesUploadInterface $fileUploader,
+        $config = []
+    ) {
+        $this->fileUploader = $fileUploader;
+        parent::__construct($id, $module, $config);
+    }
+
     public function actionIndex(): string
     {
         $task = new Task();
+        $task->setFileUploader($this->fileUploader);
         $task->load(Yii::$app->request->post());
 
         $categories = Category::find()->all();
@@ -58,4 +77,4 @@ class TasksController extends SecuredController
             'responsesDataProvider' => $responsesDataProvider,
         ]);
     }
-}
+} // TODO поудалять перед проверкой!!!!
