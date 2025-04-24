@@ -1,15 +1,23 @@
 <?php
 
 /** @var Task $task */
+
 /** @var ActiveDataProvider $responsesDataProvider */
+
+/** @var $availableActions */
 
 use app\models\Task;
 use yii\data\ActiveDataProvider;
+
 $this->title = $task->title;
 ?>
 
 <main class="main-content container">
-    <?= $this->render('_task-details', ['task' => $task, 'responsesDataProvider' => $responsesDataProvider]) ?>
+    <?= $this->render('_task-details', [
+        'task' => $task,
+        'responsesDataProvider' => $responsesDataProvider,
+        'availableActions' => $availableActions,
+    ]) ?>
     <div class="right-column">
         <?= $this->render('_task-info', ['task' => $task]) ?>
         <div class="right-card white file-card">

@@ -1,30 +1,30 @@
 <?php
 
-namespace App\OldModels;
+namespace app\logic;
 
-use App\Actions\AbstractAction;
-use App\Actions\ActionAssign;
-use App\Actions\ActionCancel;
-use App\Actions\ActionExecute;
-use App\Actions\ActionFail;
-use App\Actions\ActionRespond;
+use app\logic\Actions\AbstractAction;
+use app\logic\Actions\ActionAssign;
+use app\logic\Actions\ActionCancel;
+use app\logic\Actions\ActionExecute;
+use app\logic\Actions\ActionFail;
+use app\logic\Actions\ActionRespond;
 
 use App\Exceptions\ActionException;
 use App\Exceptions\RolesException;
 use App\Exceptions\StatusException;
 
-class Task
+class AvailableActions
 {
     // роли пользователей
     const string ROLE_CUSTOMER = 'customer';
     const string ROLE_EXECUTOR = 'executor';
 
     // статусы
-    const string STATUS_NEW = 'new';
-    const string STATUS_CANCELLED = 'cancelled';
-    const string STATUS_IN_PROGRESS = 'in_progress';
-    const string STATUS_COMPLETED = 'completed';
-    const string STATUS_FAILED = 'failed';
+    public const string STATUS_NEW = 'new';
+    public const string STATUS_CANCELLED = 'cancelled';
+    public const string STATUS_IN_PROGRESS = 'in_progress';
+    public const string STATUS_COMPLETED = 'completed';
+    public const string STATUS_FAILED = 'failed';
 
     private string $currentStatus;
     private int $customerId;
@@ -68,8 +68,15 @@ class Task
     /**
      * @throws StatusException
      */
-    public function setStatus(string $status): void {
-        $availableStatuses = [self::STATUS_NEW, self::STATUS_IN_PROGRESS, self::STATUS_COMPLETED, self::STATUS_FAILED, self::STATUS_CANCELLED];
+    public function setStatus(string $status): void
+    {
+        $availableStatuses = [
+            self::STATUS_NEW,
+            self::STATUS_IN_PROGRESS,
+            self::STATUS_COMPLETED,
+            self::STATUS_FAILED,
+            self::STATUS_CANCELLED
+        ];
 
         if (!in_array($status, $availableStatuses)) {
             throw new StatusException("Неизвестный статус: $status");
@@ -87,7 +94,7 @@ class Task
             'cancel' => 'Отменить',
             'assign' => 'Выбрать исполнителя',
             'respond' => 'Откликнуться',
-            'execute' => 'Выполнено',
+            'execute' => 'Завершить',
             'fail' => 'Отказаться',
         ];
     }
@@ -143,8 +150,10 @@ class Task
         if ($this->currentStatus === self::STATUS_IN_PROGRESS) {
             if ($userId === $this->customerId) {
                 $actions[] = new ActionExecute();
-            } else if ($userId === $this->executorId) {
-                $actions[] = new ActionFail();
+            } else {
+                if ($userId === $this->executorId) {
+                    $actions[] = new ActionFail();
+                }
             }
         }
 

@@ -1,21 +1,23 @@
 <?php
 
-namespace App\Actions;
+namespace app\logic\Actions;
 
-class ActionRespond extends AbstractAction
+use app\logic\Actions\AbstractAction;
+
+class ActionCancel extends AbstractAction
 {
     public function getName(): string
     {
-        return "Откликнуться";
+        return "Отменить";
     }
 
     public function getInternalName(): string
     {
-        return "respond";
+        return "cancel";
     }
 
     public function isAvailable(int $userId, int $customerId, ?int $executorId): bool
     {
-        return $userId !== $customerId && $executorId === null;
+        return $userId === $customerId;
     }
 }

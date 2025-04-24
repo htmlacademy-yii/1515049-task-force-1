@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Actions;
+namespace app\logic\Actions;
+
+use app\logic\Actions\AbstractAction;
 
 class ActionFail extends AbstractAction
 {
     public function getName(): string
     {
-        return "Отказаться";
+        return "Отказаться от задания";
     }
 
     public function getInternalName(): string

@@ -166,6 +166,13 @@ class Task extends ActiveRecord
         ];
     }
 
+    /**
+     * Валидация дедлайна при создании нового задания
+     *
+     * @param $attribute
+     * @param $params
+     * @return bool
+     */
     public function validateDeadline($attribute, $params): bool
     {
         if ($this->$attribute && strtotime($this->$attribute) <= strtotime('now')) {

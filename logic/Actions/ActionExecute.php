@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Actions;
+namespace app\logic\Actions;
+
+use app\logic\Actions\AbstractAction;
 
 class ActionExecute extends AbstractAction
 {
     public function getName(): string
     {
-        return "Выполнено";
+        return "Завершить задание";
     }
 
     public function getInternalName(): string
