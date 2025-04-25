@@ -45,6 +45,8 @@ class File extends ActiveRecord
                 'targetClass' => Task::class,
                 'targetAttribute' => ['task_id' => 'id']
             ],
+            ['size', 'integer'],
+            ['size', 'default', 'value' => 0],
         ];
     }
 
