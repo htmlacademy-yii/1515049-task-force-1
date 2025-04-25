@@ -2,8 +2,6 @@
 
 namespace app\logic\Actions;
 
-use app\logic\Actions\AbstractAction;
-
 class ActionRespond extends AbstractAction
 {
     public function getName(): string
@@ -13,7 +11,7 @@ class ActionRespond extends AbstractAction
 
     public function getInternalName(): string
     {
-        return "respond";
+        return "act_response";
     }
 
     public function isAvailable(int $userId, int $customerId, ?int $executorId): bool

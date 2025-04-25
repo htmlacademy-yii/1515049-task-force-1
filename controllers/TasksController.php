@@ -86,6 +86,7 @@ class TasksController extends SecuredController
             'responsesDataProvider' => $responsesDataProvider,
             'availableActions' => $availableActions,
             'currentUserId' => Yii::$app->user->id,
+            'taskId' => $id,
         ]);
     }
 } // TODO поудалять перед проверкой!!!!

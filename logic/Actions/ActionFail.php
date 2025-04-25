@@ -2,8 +2,6 @@
 
 namespace app\logic\Actions;
 
-use app\logic\Actions\AbstractAction;
-
 class ActionFail extends AbstractAction
 {
     public function getName(): string
@@ -13,7 +11,7 @@ class ActionFail extends AbstractAction
 
     public function getInternalName(): string
     {
-        return "fail";
+        return "refusal";
     }
 
     public function isAvailable(int $userId, int $customerId, ?int $executorId): bool

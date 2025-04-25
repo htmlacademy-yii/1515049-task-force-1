@@ -40,10 +40,30 @@ class Response extends ActiveRecord
             [['price', 'comment'], 'default', 'value' => null],
             [['task_id', 'executor_id'], 'required'],
             [['task_id', 'executor_id', 'price'], 'integer'],
-            [['comment'], 'string'],
+            [
+                'price',
+                'compare',
+                'compareValue' => 0,
+                'operator' => '>',
+                'type' => 'number',
+                'message' => 'Цена должна быть целым положительным числом.'
+            ],
+            [['comment'], 'string', 'max' => 255],
             [['created_at'], 'safe'],
-            [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['task_id' => 'id']],
-            [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['executor_id' => 'id']],
+            [
+                ['task_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => Task::class,
+                'targetAttribute' => ['task_id' => 'id']
+            ],
+            [
+                ['executor_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => User::class,
+                'targetAttribute' => ['executor_id' => 'id']
+            ],
         ];
     }
 
@@ -53,17 +73,13 @@ class Response extends ActiveRecord
     public function attributeLabels(): array
     {
         return [
-            'id' => 'ID',
-            'task_id' => 'Task ID',
-            'executor_id' => 'Executor ID',
-            'price' => 'Price',
-            'comment' => 'Comment',
-            'created_at' => 'Created At',
+            'price' => 'Стоимость',
+            'comment' => 'Ваш Комментарий',
         ];
     }
 
     /**
-     * Gets query for [[Executor]].
+     * Gets a query for [[Executor]].
      *
      * @return ActiveQuery
      */
@@ -73,7 +89,7 @@ class Response extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Task]].
+     * Gets a query for [[Task]].
      *
      * @return ActiveQuery
      */
@@ -81,5 +97,4 @@ class Response extends ActiveRecord
     {
         return $this->hasOne(Task::class, ['id' => 'task_id']);
     }
-
 }

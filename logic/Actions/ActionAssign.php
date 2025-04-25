@@ -2,8 +2,6 @@
 
 namespace app\logic\Actions;
 
-use app\logic\Actions\AbstractAction;
-
 class ActionAssign extends AbstractAction
 {
     public function getName(): string

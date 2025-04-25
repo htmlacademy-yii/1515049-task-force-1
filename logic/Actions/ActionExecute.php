@@ -2,8 +2,6 @@
 
 namespace app\logic\Actions;
 
-use app\logic\Actions\AbstractAction;
-
 class ActionExecute extends AbstractAction
 {
     public function getName(): string
@@ -13,7 +11,7 @@ class ActionExecute extends AbstractAction
 
     public function getInternalName(): string
     {
-        return "execute";
+        return "completion";
     }
 
     public function isAvailable(int $userId, int $customerId, ?int $executorId): bool

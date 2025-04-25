@@ -2,8 +2,6 @@
 
 namespace app\logic\Actions;
 
-use app\logic\Actions\AbstractAction;
-
 class ActionCancel extends AbstractAction
 {
     public function getName(): string

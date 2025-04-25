@@ -6,6 +6,7 @@
 
 /** @var $availableActions */
 
+use app\models\Response;
 use app\models\Task;
 use yii\data\ActiveDataProvider;
 
@@ -35,3 +36,6 @@ $this->title = $task->title;
         </div>
     </div>
 </main>
+<?= $this->render('//modals/_act_response', [
+    'model' => new Response(), // или передай модель отклика из контроллера
+]) ?>
