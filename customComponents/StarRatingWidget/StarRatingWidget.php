@@ -29,7 +29,8 @@ class StarRatingWidget extends Widget
     public function init(): void
     {
         parent::init();
-        $this->rating = min(max($this->rating, 0), self::MAX_RATING); // ограничение рейтинга в пределах от 0 до MAX_RATING
+        // ограничение рейтинга в пределах от 0 до MAX_RATING:
+        $this->rating = min(max($this->rating, 0), self::MAX_RATING);
     }
 
     public function run()
