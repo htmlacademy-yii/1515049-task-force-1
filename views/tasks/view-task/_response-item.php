@@ -34,7 +34,15 @@ use yii\helpers\Url;
         <p class="price price--small">3700 ₽</p>
     </div>
     <div class="button-popup">
-        <a href="#" class="button button--blue button--small">Принять</a>
-        <a href="#" class="button button--orange button--small">Отказать</a>
+        <?= Html::a(
+            'Принять',
+            ['response/accept', 'id' => $model->id],
+            ['class' => 'button button--blue button--small']
+        ) ?>
+        <?= Html::a(
+            'Отказать',
+            ['response/reject', 'id' => $model->id],
+            ['class' => 'button button--orange button--small']
+        ) ?>
     </div>
 </div>

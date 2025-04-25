@@ -2,6 +2,10 @@
 
 namespace app\logic\Actions;
 
+use app\models\Response;
+use app\models\Task;
+use yii\db\Exception;
+
 class ActionRespond extends AbstractAction
 {
     public function getName(): string
@@ -17,5 +21,15 @@ class ActionRespond extends AbstractAction
     public function isAvailable(int $userId, int $customerId, ?int $executorId): bool
     {
         return $userId !== $customerId && $executorId === null;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function execute(Task $task, Response $response): bool
+    {
+        $task->executor_id = $response->executor_id;
+        $task->status = Task::STATUS_IN_PROGRESS;
+        return $task->save();
     }
 }

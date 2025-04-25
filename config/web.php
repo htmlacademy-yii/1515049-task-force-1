@@ -1,9 +1,7 @@
 <?php
 
 use app\interfaces\FilesUploadInterface;
-use app\interfaces\TaskValidatorInterface;
 use app\services\FileUploader;
-use app\services\TaskValidator;
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
@@ -66,6 +64,8 @@ $config = [
                 'signup' => 'signup/index',
                 'login' => 'auth/login',
                 'logout' => 'auth/logout',
+                'response/accept/<id:\d+>' => 'response-actions/accept',
+                'response/reject/<id:\d+>' => 'response-actions/reject',
             ],
         ],
     ],

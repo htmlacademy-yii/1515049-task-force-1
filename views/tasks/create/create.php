@@ -26,6 +26,7 @@ $this->title = 'Публикация нового задания';
     <div class="add-task-form regular-form">
         <?php
         $form = ActiveForm::begin([
+            'options' => ['enctype' => 'multipart/form-data'],
             'fieldConfig' => [
                 'template' => "{label}\n{input}\n{error}",
                 'errorOptions' => ['tag' => 'span', 'class' => 'help-block'],
@@ -84,7 +85,12 @@ $this->title = 'Публикация нового задания';
         </div>
         <p class="form-label">Файлы</p>
         <div class="new-file">
-            Добавить новый файл
+            <?= $form->field($model, 'files[]', ['template' => '{input}'])->fileInput([
+                'multiple' => true,
+                'hidden' => true,
+                'id' => 'file-upload',
+            ]) ?>
+            <label for="file-upload">Добавить новый файл</label>
         </div>
         <?= Html::submitInput('Опубликовать', ['class' => 'button button--blue']) ?>
         <?php

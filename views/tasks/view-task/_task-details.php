@@ -13,6 +13,11 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+$isCustomer = Yii::$app->user->id === $task->customer_id;
+$userIsExecutorOfAnyResponse = Response::find()
+    ->where(['executor_id' => Yii::$app->user->id, 'task_id' => $task->id])
+    ->exists();
+
 ?>
 
 <div class="left-column">
@@ -31,7 +36,11 @@ use yii\helpers\Url;
         <p class="map-address town">Москва</p>
         <p class="map-address">Новый арбат, 23, к. 1</p>
     </div>
-    <h4 class="head-regular">Отклики на задание</h4>
-    <?= $this->render('_response-list', ['responsesDataProvider' => $responsesDataProvider]) ?>
+    <?php
+    if ($isCustomer || $userIsExecutorOfAnyResponse) : ?>
+        <h4 class="head-regular">Отклики на задание</h4>
+        <?= $this->render('_response-list', ['responsesDataProvider' => $responsesDataProvider]) ?>
+    <?php
+    endif; ?>
 </div>
 <div class="overlay"></div>

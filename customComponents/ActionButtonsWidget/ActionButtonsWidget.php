@@ -5,6 +5,7 @@ namespace app\customComponents\ActionButtonsWidget;
 use app\logic\Actions\AbstractAction;
 use app\logic\AvailableActions;
 use app\models\Response;
+use app\models\Task;
 use yii\base\Widget;
 use yii\helpers\Html;
 
@@ -12,7 +13,7 @@ final class ActionButtonsWidget extends Widget
 {
     public AvailableActions $availableActions;
     public int $currentUserId;
-    public $task;
+    public Task $task;
 
     public function run(): string
     {

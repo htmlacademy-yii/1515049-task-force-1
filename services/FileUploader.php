@@ -23,7 +23,7 @@ final class FileUploader implements FilesUploadInterface
         $savedFiles = [];
         foreach ($files as $file) {
             $fileName = Yii::$app->security->generateRandomString() . '.' . $file->extension;
-            $filePath = "$uploadPath . '/' . $fileName";
+            $filePath = $uploadPath . '/' . $fileName;
 
             if (!$file->saveAs($filePath)) {
                 $fileModel = new File();

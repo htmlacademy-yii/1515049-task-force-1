@@ -37,5 +37,5 @@ $this->title = $task->title;
     </div>
 </main>
 <?= $this->render('//modals/_act_response', [
-    'model' => new Response(), // или передай модель отклика из контроллера
+    'model' => new Response(),
 ]) ?>

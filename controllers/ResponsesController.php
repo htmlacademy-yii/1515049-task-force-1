@@ -8,6 +8,9 @@ use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 
+/**
+ *  Обработка действий кнопок задания
+ */
 final class ResponsesController extends Controller
 {
 
