@@ -7,9 +7,15 @@ use app\models\Response;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
+$user = Yii::$app->user->identity;
 ?>
 <div class="response-card">
-    <img class="customer-photo" src="<?= Url::to('@web/img/' . $model->executor->avatar) ?>"
+    <?php
+    $avatarPath = $model->executor->avatar
+        ? Url::to('@web/img/' . $model->executor->avatar)
+        : Url::to('@web/img/man-glasses.png');
+    ?>
+    <img class="customer-photo" src="<?= $avatarPath; ?>"
          width="146" height="156" alt="Фото заказчиков">
     <div class="feedback-wrapper">
         <a href="<?= Url::to(['users/view', 'id' => $model->executor->id]) ?>" class="link link--block link--big">
@@ -31,18 +37,26 @@ use yii\helpers\Url;
         <p class="info-text"><span class="current-time">
             <?= Yii::$app->formatter->asRelativeTime(strtotime($model->created_at)) ?>
         </p>
-        <p class="price price--small">3700 ₽</p>
+        <?php
+        if (!empty($model->price)) : ?>
+            <p class="price price--small"><?= Html::encode($model->price) ?> ₽</p>
+        <?php
+        endif; ?>
     </div>
-    <div class="button-popup">
-        <?= Html::a(
-            'Принять',
-            ['response/accept', 'id' => $model->id],
-            ['class' => 'button button--blue button--small']
-        ) ?>
-        <?= Html::a(
-            'Отказать',
-            ['response/reject', 'id' => $model->id],
-            ['class' => 'button button--orange button--small']
-        ) ?>
-    </div>
+    <?php
+    if ($user->role === 'customer') : ?>
+        <div class="button-popup">
+            <?= Html::a(
+                'Принять',
+                ['response/accept', 'id' => $model->id],
+                ['class' => 'button button--blue button--small']
+            ) ?>
+            <?= Html::a(
+                'Отказать',
+                ['response/reject', 'id' => $model->id],
+                ['class' => 'button button--orange button--small']
+            ) ?>
+        </div>
+    <?php
+    endif; ?>
 </div>

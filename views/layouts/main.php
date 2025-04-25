@@ -38,6 +38,8 @@ $this->beginPage() ?>
 $this->beginBody() ?>
 
 <div class="table-layout">
+    <?php
+    $user = Yii::$app->user->identity; ?>
     <header class="page-header">
         <nav class="main-nav">
             <a href='<?= Url::to('/tasks') ?>' class="header-logo">
@@ -49,14 +51,18 @@ $this->beginBody() ?>
                 <div class="nav-wrapper">
                     <ul class="nav-list">
                         <li class="list-item list-item--active">
-                            <a href='<?= Url::to('/publish') ?>' class="link link--nav">Новое</a>
+                            <a href="<?= Url::to('/tasks') ?>" class="link link--nav">Новое</a>
                         </li>
                         <li class="list-item">
                             <a href="#" class="link link--nav">Мои задания</a>
                         </li>
-                        <li class="list-item">
-                            <a href="#" class="link link--nav">Создать задание</a>
-                        </li>
+                        <?php
+                        if ($user->role === 'customer') : ?>
+                            <li class="list-item">
+                                <a href="<?= Url::to('/publish') ?>" class="link link--nav">Создать задание</a>
+                            </li>
+                        <?php
+                        endif; ?>
                         <li class="list-item">
                             <a href="#" class="link link--nav">Настройки</a>
                         </li>
@@ -67,12 +73,14 @@ $this->beginBody() ?>
         </nav>
         <?php
         if (Yii::$app->controller->id !== 'signup') : ?>
-            <?php
-            $user = Yii::$app->user->identity; ?>
             <div class="user-block">
-                <a href="#">
-                    <img class="user-photo" src="/img/<?= $user->avatar; ?>" width="55" height="55" alt="Аватар">
-                </a>
+                <?php
+                if ($user->avatar !== null) : ?>
+                    <a href="#">
+                        <img class="user-photo" src="/img/<?= $user->avatar; ?>" width="55" height="55" alt="Аватар">
+                    </a>
+                <?php
+                endif; ?>
                 <div class="user-menu">
                     <p class="user-name"><?= $user->name ?></p>
                     <div class="popup-head">
