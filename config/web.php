@@ -1,6 +1,7 @@
 <?php
 
 use app\interfaces\FilesUploadInterface;
+use app\logic\Actions\CreateTaskAction;
 use app\services\FileUploader;
 
 $params = require __DIR__ . '/params.php';
@@ -69,7 +70,8 @@ $config = [
     ],
     'container' => [
         'singletons' => [
-            FilesUploadInterface::class => FileUploader::class,
+            FilesUploadInterface::class => ['class' => FileUploader::class],
+            CreateTaskAction::class => CreateTaskAction::class,
         ],
     ],
     'params' => $params,
