@@ -64,8 +64,6 @@ $config = [
                 'signup' => 'signup/index',
                 'login' => 'auth/login',
                 'logout' => 'auth/logout',
-                'response/accept/<id:\d+>' => 'response-actions/accept',
-                'response/reject/<id:\d+>' => 'response-actions/reject',
             ],
         ],
     ],

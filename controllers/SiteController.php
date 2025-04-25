@@ -28,6 +28,15 @@ class SiteController extends SecuredController
         ];
     }
 
+    public function actions(): array
+    {
+        return [
+            'error' => [
+                'class' => 'yii\web\ErrorAction',
+            ],
+        ];
+    }
+
     /**
      * Главная страница (лендинг)
      */

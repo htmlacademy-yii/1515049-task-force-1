@@ -41,6 +41,10 @@ final class ActionReject extends AbstractAction
      */
     public function execute(Response $response): bool
     {
-        return $response->delete();
+        if ($response->delete() > 0) {
+            return true;
+        }
+
+        return false;
     }
 }

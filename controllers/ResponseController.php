@@ -17,7 +17,7 @@ use yii\web\NotFoundHttpException;
 /**
  *  Контроллер для обработки действий принять/отказать каждого отклика на задание
  */
-final class ResponseActionsController extends Controller
+final class ResponseController extends Controller
 {
     public function behaviors(): array
     {
@@ -33,7 +33,7 @@ final class ResponseActionsController extends Controller
                         'actions' => ['accept', 'reject'],
                         'roles' => ['@'],
                         'matchCallback' => function () {
-                            return Yii::$app->user->identity->isRoleExecutor();
+                            return Yii::$app->user->identity->isRoleCustomer();
                         },
                     ],
                 ],
