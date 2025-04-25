@@ -4,6 +4,7 @@ namespace app\customComponents\ActionButtonsWidget;
 
 use app\logic\Actions\AbstractAction;
 use app\logic\AvailableActions;
+use app\models\Response;
 use yii\base\Widget;
 use yii\helpers\Html;
 
@@ -21,11 +22,19 @@ final class ActionButtonsWidget extends Widget
 
         foreach ($actions as $action) {
             if ($action instanceof AbstractAction) {
+                if ($action->getInternalName() === 'act_response' && $this->hasResponded()) {
+                    continue;
+                }
                 $buttons[] = $this->generateButton($action);
             }
         }
 
         return implode(PHP_EOL, $buttons);
+    }
+
+    private function hasResponded(): bool
+    {
+        return Response::find()->where(['task_id' => $this->task->id, 'executor_id' => $this->currentUserId])->exists();
     }
 
     /**

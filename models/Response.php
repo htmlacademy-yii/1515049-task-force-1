@@ -39,14 +39,13 @@ class Response extends ActiveRecord
         return [
             [['price', 'comment'], 'default', 'value' => null],
             [['task_id', 'executor_id'], 'required'],
-            [['task_id', 'executor_id', 'price'], 'integer'],
+            [['task_id', 'executor_id'], 'integer'],
             [
                 'price',
-                'compare',
-                'compareValue' => 0,
-                'operator' => '>',
-                'type' => 'number',
-                'message' => 'Цена должна быть целым положительным числом.'
+                'number',
+                'integerOnly' => true,
+                'min' => 1,
+                'message' => 'Цена должна быть целым положительным числом.',
             ],
             [['comment'], 'string', 'max' => 255],
             [['created_at'], 'safe'],

@@ -24,6 +24,7 @@ use yii\helpers\Url;
     <?= ActionButtonsWidget::widget([
         'availableActions' => $availableActions,
         'currentUserId' => Yii::$app->user->id,
+        'task' => $task,
     ]); ?>
     <div class="task-map">
         <img class="map" src="<?= Url::to('@web/img/map.png') ?>" width="725" height="346" alt="Новый арбат, 23, к. 1">

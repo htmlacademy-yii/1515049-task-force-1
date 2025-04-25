@@ -29,7 +29,7 @@ use yii\helpers\Url;
     </div>
     <div class="feedback-wrapper">
         <p class="info-text"><span class="current-time">
-            <?= Yii::$app->formatter->asRelativeTime($model->created_at) ?>
+            <?= Yii::$app->formatter->asRelativeTime(strtotime($model->created_at)) ?>
         </p>
         <p class="price price--small">3700 ₽</p>
     </div>
