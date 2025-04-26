@@ -8,6 +8,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 $user = Yii::$app->user->identity;
+$isExecutorAssigned = $model->task->executor_id !== null;
 ?>
 <div class="response-card">
     <?php
@@ -44,7 +45,7 @@ $user = Yii::$app->user->identity;
         endif; ?>
     </div>
     <?php
-    if ($user->role === 'customer') : ?>
+    if ($user->role === 'customer' && !$isExecutorAssigned) : ?>
         <div class="button-popup">
             <?= Html::a(
                 'Принять',
