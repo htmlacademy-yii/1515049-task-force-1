@@ -12,12 +12,13 @@ use app\logic\Actions\ActionRespond;
 use App\Exceptions\ActionException;
 use App\Exceptions\RolesException;
 use App\Exceptions\StatusException;
+use Yii;
 
 class AvailableActions
 {
     // роли пользователей
-    const string ROLE_CUSTOMER = 'customer';
-    const string ROLE_EXECUTOR = 'executor';
+    public const string ROLE_CUSTOMER = 'customer';
+    public const string ROLE_EXECUTOR = 'executor';
 
     // статусы
     public const string STATUS_NEW = 'new';
@@ -149,7 +150,7 @@ class AvailableActions
 
         if ($this->currentStatus === self::STATUS_IN_PROGRESS) {
             if ($userId === $this->customerId) {
-                $actions[] = new ActionExecute();
+                $actions[] = Yii::$container->get(ActionExecute::class);
             } else {
                 if ($userId === $this->executorId) {
                     $actions[] = new ActionFail();

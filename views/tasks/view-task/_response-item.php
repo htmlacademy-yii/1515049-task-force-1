@@ -14,7 +14,7 @@ $isExecutorAssigned = $model->task->executor_id !== null;
     <?php
     $avatarPath = $model->executor->avatar
         ? Url::to('@web/img/' . $model->executor->avatar)
-        : Url::to('@web/img/man-glasses.png');
+        : Url::to('@web/img/man-glasses.jpg');
     ?>
     <img class="customer-photo" src="<?= $avatarPath; ?>"
          width="146" height="156" alt="Фото заказчиков">

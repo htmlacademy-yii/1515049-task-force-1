@@ -23,8 +23,6 @@ use yii\db\ActiveRecord;
  */
 class Review extends ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -39,14 +37,34 @@ class Review extends ActiveRecord
     public function rules(): array
     {
         return [
+            [['comment', 'rating'], 'required'],
+            ['rating', 'integer', 'min' => 1, 'max' => 5],
             [['comment'], 'default', 'value' => null],
-            [['task_id', 'customer_id', 'executor_id', 'rating'], 'required'],
+            [['task_id', 'customer_id', 'executor_id'], 'safe'],
             [['task_id', 'customer_id', 'executor_id', 'rating'], 'integer'],
-            [['comment'], 'string'],
+            [['comment'], 'string', 'max' => 255],
             [['created_at'], 'safe'],
-            [['task_id'], 'exist', 'skipOnError' => true, 'targetClass' => Task::class, 'targetAttribute' => ['task_id' => 'id']],
-            [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['customer_id' => 'id']],
-            [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['executor_id' => 'id']],
+            [
+                ['task_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => Task::class,
+                'targetAttribute' => ['task_id' => 'id']
+            ],
+            [
+                ['customer_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => User::class,
+                'targetAttribute' => ['customer_id' => 'id']
+            ],
+            [
+                ['executor_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => User::class,
+                'targetAttribute' => ['executor_id' => 'id']
+            ],
         ];
     }
 
@@ -85,7 +103,7 @@ class Review extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Customer]].
+     * Gets a query for [[Customer]].
      *
      * @return ActiveQuery
      */
@@ -95,7 +113,7 @@ class Review extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Executor]].
+     * Gets a query for [[Executor]].
      *
      * @return ActiveQuery
      */
@@ -105,7 +123,7 @@ class Review extends ActiveRecord
     }
 
     /**
-     * Gets query for [[Task]].
+     * Gets a query for [[Task]].
      *
      * @return ActiveQuery
      */

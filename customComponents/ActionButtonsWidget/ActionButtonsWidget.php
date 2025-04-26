@@ -68,15 +68,11 @@ final class ActionButtonsWidget extends Widget
 
     private function getButtonColor(string $actionName): string
     {
-        switch ($actionName) {
-            case 'act_response':
-                return 'blue';
-            case 'refusal':
-                return 'orange';
-            case 'completion':
-                return 'pink';
-            default:
-                return 'default';
-        }
+        return match ($actionName) {
+            'act_response' => 'blue',
+            'refusal' => 'orange',
+            'completion' => 'pink',
+            default => 'default',
+        };
     }
 }

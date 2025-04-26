@@ -7,6 +7,7 @@
 /** @var $availableActions */
 
 use app\models\Response;
+use app\models\Review;
 use app\models\Task;
 use yii\data\ActiveDataProvider;
 
@@ -38,4 +39,9 @@ $this->title = $task->title;
 </main>
 <?= $this->render('//modals/_act_response', [
     'model' => new Response(),
+]) ?>
+
+<?= $this->render('//modals/_completion', [
+    'model' => new Review(),
+    'task' => $task,
 ]) ?>
