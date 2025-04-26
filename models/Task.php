@@ -45,10 +45,10 @@ use yii\db\ActiveRecord;
  */
 class Task extends ActiveRecord
 {
-    public array $categoryIds = [];
-    public string $noResponses = '0';
-    public string $noLocation = '0';
-    public ?string $filterPeriod = null;
+    public $categoryIds;
+    public $noResponses;
+    public $noLocation;
+    public $filterPeriod;
     public array $files = [];
 
     /**
@@ -77,6 +77,7 @@ class Task extends ActiveRecord
             [['budget', 'latitude', 'longitude'], 'number'],
             [['ended_at', 'created_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
+            [['categoryIds', 'noResponses', 'noLocation', 'filterPeriod'], 'safe'],
             [
                 ['customer_id'],
                 'exist',
@@ -117,7 +118,7 @@ class Task extends ActiveRecord
         ];
     }
 
-    public function scenarios()
+    public function scenarios(): array
     {
         $scenarios = parent::scenarios();
         $scenarios[CreateTaskAction::SCENARIO_CREATE] = [
@@ -214,12 +215,11 @@ class Task extends ActiveRecord
             $query->andWhere(['city_id' => null]);
         }
 
-        if ($this->filterPeriod) {
-            $query->andWhere([
-                '>=',
-                'created_at',
-                date('Y-m-d H:i:s', time() - (int)$this->filterPeriod)
-            ]);
+        if (!empty($this->filterPeriod)) {
+            $period = (int)$this->filterPeriod;
+            if ($period > 0) {
+                $query->andWhere(['>=', 'tasks.created_at', date('Y-m-d H:i:s', time() - $period)]);
+            }
         }
 
         return $query->orderBy(['created_at' => SORT_DESC]);

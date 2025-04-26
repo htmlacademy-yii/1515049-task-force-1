@@ -33,8 +33,11 @@ class TasksController extends SecuredController
     public function actionIndex(): string
     {
         $task = new Task();
+        if (Yii::$app->request->isGet) {
+            $task->load(Yii::$app->request->get());
+        }
+
         $task->setFileUploader($this->fileUploader);
-        $task->load(Yii::$app->request->post());
 
         $categories = Category::find()->all();
 
@@ -63,11 +66,11 @@ class TasksController extends SecuredController
             throw new NotFoundHttpException('Задание не найдено.');
         }
 
-        $customerId = $task->customer_id;
-        $currentStatus = $task->status;
-        $executorId = $task->executor_id;
-
-        $availableActions = new AvailableActions($customerId, $currentStatus, $executorId);
+        $availableActions = new AvailableActions(
+            $task->customer_id,
+            $task->status,
+            $task->executor_id
+        );
 
         $responsesDataProvider = new ActiveDataProvider([
             'query' => Response::find()
