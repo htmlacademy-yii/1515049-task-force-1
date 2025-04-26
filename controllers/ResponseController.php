@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace app\controllers;
 
+use app\logic\Actions\ActionAssign;
 use app\logic\Actions\ActionReject;
 use app\logic\Actions\ActionRespond;
 use app\models\Response;
 use Yii;
 use yii\db\Exception;
+use yii\db\StaleObjectException;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -33,7 +35,7 @@ final class ResponseController extends Controller
                         'actions' => ['accept', 'reject'],
                         'roles' => ['@'],
                         'matchCallback' => function () {
-                            return Yii::$app->user->identity->isRoleCustomer();
+                            return Yii::$app->user->identity->role === 'customer';
                         },
                     ],
                 ],
@@ -54,7 +56,7 @@ final class ResponseController extends Controller
         }
 
         $task = $response->task;
-        $action = new ActionRespond();
+        $action = new ActionAssign();
 
         if (!$action->isAvailable(Yii::$app->user->id, $task->customer_id, $task->executor_id)) {
             throw new ForbiddenHttpException("Действие недоступно");
@@ -70,8 +72,10 @@ final class ResponseController extends Controller
     }
 
     /**
-     * @throws NotFoundHttpException
+     * @throws \Throwable
+     * @throws StaleObjectException
      * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
     public function actionReject(int $id): \yii\web\Response
     {

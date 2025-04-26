@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\logic\AvailableActions;
 use app\models\Category;
 use app\models\Task;
 use app\models\User;
@@ -35,11 +36,11 @@ class UsersController extends SecuredController
             'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]]
         ]);
         $completedTasks = Task::find()
-            ->where(['executor_id' => $id, 'status' => Task::STATUS_COMPLETED])
+            ->where(['executor_id' => $id, 'status' => AvailableActions::STATUS_COMPLETED])
             ->count();
 
         $failedTasks = Task::find()
-            ->where(['executor_id' => $id, 'status' => Task::STATUS_FAILED])
+            ->where(['executor_id' => $id, 'status' => AvailableActions::STATUS_FAILED])
             ->count();
 
         return $this->render('view-user/view', [

@@ -2,6 +2,7 @@
 
 namespace app\logic\Actions;
 
+use app\logic\AvailableActions;
 use app\models\Response;
 use app\models\Task;
 use yii\db\Exception;
@@ -29,7 +30,7 @@ class ActionRespond extends AbstractAction
     public function execute(Task $task, Response $response): bool
     {
         $task->executor_id = $response->executor_id;
-        $task->status = Task::STATUS_IN_PROGRESS;
+        $task->status = AvailableActions::STATUS_IN_PROGRESS;
         return $task->save();
     }
 }
