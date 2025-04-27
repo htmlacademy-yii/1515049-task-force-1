@@ -12,7 +12,7 @@ $config = [
     'controllerNamespace' => 'app\commands',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
         '@tests' => '@app/tests',
     ],
     'components' => [
@@ -40,7 +40,7 @@ $config = [
         ],
         'shell' => [
             'class' => 'yii\console\Controller',
-            'action' => function() {
+            'action' => function () {
                 Shell::debug();
             }
         ],

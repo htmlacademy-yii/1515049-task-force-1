@@ -19,9 +19,9 @@ class StarRatingWidget extends Widget
     // Task: модуль 2, задание module6-task2
 
     public float $rating; // значение рейтинга
-    const int MAX_RATING = 5; // максимальный рейтинг
-    const string DEFAULT_WRAPPER_CLASS = 'stars-rating small'; // css-класс обертки
-    const string DEFAULT_FILLED_CLASS = 'fill-star'; // css-класс закрашенной звезды
+    public const int MAX_RATING = 5; // максимальный рейтинг
+    public const string DEFAULT_WRAPPER_CLASS = 'stars-rating small'; // css-класс обертки
+    public const string DEFAULT_FILLED_CLASS = 'fill-star'; // css-класс закрашенной звезды
 
     public string $wrapperClass = self::DEFAULT_WRAPPER_CLASS;
     public string $filledClass = self::DEFAULT_FILLED_CLASS;

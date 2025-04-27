@@ -1,15 +1,25 @@
 <?php
 
 /** @var Task $task */
+
 /** @var ActiveDataProvider $responsesDataProvider */
 
+/** @var $availableActions */
+
+use app\models\Response;
+use app\models\Review;
 use app\models\Task;
 use yii\data\ActiveDataProvider;
+
 $this->title = $task->title;
 ?>
 
 <main class="main-content container">
-    <?= $this->render('_task-details', ['task' => $task, 'responsesDataProvider' => $responsesDataProvider]) ?>
+    <?= $this->render('_task-details', [
+        'task' => $task,
+        'responsesDataProvider' => $responsesDataProvider,
+        'availableActions' => $availableActions,
+    ]) ?>
     <div class="right-column">
         <?= $this->render('_task-info', ['task' => $task]) ?>
         <div class="right-card white file-card">
@@ -27,3 +37,21 @@ $this->title = $task->title;
         </div>
     </div>
 </main>
+<?= $this->render('//modals/_act_response', [
+    'model' => new Response(),
+]) ?>
+
+<?= $this->render('//modals/_completion', [
+    'model' => new Review(),
+    'task' => $task,
+]) ?>
+
+<?= $this->render('//modals/_refusal', [
+    'model' => new Response(),
+    'task' => $task,
+]) ?>
+
+<?= $this->render('//modals/_cancel', [
+    'model' => new Review(),
+    'task' => $task,
+]) ?>

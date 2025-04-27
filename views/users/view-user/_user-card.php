@@ -6,11 +6,19 @@ use app\customComponents\StarRatingWidget\StarRatingWidget;
 use app\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
+
 ?>
 
 <div class="user-card">
     <div class="photo-rate">
-        <img class="card-photo" src="<?= Url::to('@web/img/' . $user->avatar) ?>" width="191" height="190" alt="Фото пользователя">
+        <?php
+        $avatar = !empty($user->avatar) ? $user->avatar : 'man-glasses.jpg';
+        ?>
+        <img class="card-photo"
+             src="<?= Url::to('@web/img/' . $avatar) ?>"
+             width="191"
+             height="190"
+             alt="Фото пользователя">
         <div class="card-rate">
             <?= StarRatingWidget::widget(
                 ['rating' => $user->executor_rating, 'wrapperClass' => 'stars-rating big',]

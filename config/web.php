@@ -1,9 +1,10 @@
 <?php
 
 use app\interfaces\FilesUploadInterface;
-use app\interfaces\TaskValidatorInterface;
+use app\logic\Actions\ActionExecute;
+use app\logic\Actions\CreateTaskAction;
 use app\services\FileUploader;
-use app\services\TaskValidator;
+use app\services\TaskCompletionService;
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
@@ -71,7 +72,8 @@ $config = [
     ],
     'container' => [
         'singletons' => [
-            FilesUploadInterface::class => FileUploader::class,
+            FilesUploadInterface::class => ['class' => FileUploader::class],
+            CreateTaskAction::class => CreateTaskAction::class,
         ],
     ],
     'params' => $params,

@@ -12,9 +12,13 @@ use yii\widgets\ActiveForm;
 
 <?php
 $form = ActiveForm::begin([
-    'method' => 'post',
+    'id' => 'task-filter-form',
+    'method' => 'get',
     'action' => ['tasks/index'],
     'enableClientScript' => false,
+    'options' => [
+        'enctype' => 'multipart/form-data'
+    ],
     'fieldConfig' => [
         'template' => "{input}\n{label}",
         'labelOptions' => ['class' => 'control-label'],
@@ -68,7 +72,7 @@ $form = ActiveForm::begin([
     <?= $form->field($task, 'filterPeriod', [
         'options' => ['class' => 'form-group'],
         'template' => "{label}\n{input}",
-        'labelOptions' => ['class' => 'period-value', 'for' => 'period-value'],
+        'labelOptions' => ['class' => 'period-value'],
     ])->dropDownList([
         '' => 'Любое время',
         '3600' => 'За последний час',
@@ -76,10 +80,21 @@ $form = ActiveForm::begin([
         '604800' => 'За неделю'
     ], [
         'id' => 'period-value',
-        'class' => '',
-    ])->label('') ?>
+        'class' => 'form-control',
+    ])->label(false) ?>
 
     <?= Html::submitInput('Искать', ['class' => 'button button--blue']) ?>
 </div>
 <?php
 ActiveForm::end() ?>
+<?php
+$this->registerJs(
+    <<<JS
+    $('#task-filter-form').on('submit', function(e) {
+        console.log('Form submitted');
+        console.log('Period value:', $('#period-value').val());
+        console.log('Form data:', $(this).serialize());
+    });
+JS
+);
+?>

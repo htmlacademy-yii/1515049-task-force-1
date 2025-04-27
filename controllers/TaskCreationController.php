@@ -6,6 +6,8 @@ namespace app\controllers;
 
 use app\interfaces\FilesUploadInterface;
 use app\interfaces\TaskValidatorInterface;
+use app\logic\Actions\CreateTaskAction;
+use app\logic\AvailableActions;
 use app\models\Category;
 use app\models\City;
 use app\models\Task;
@@ -52,36 +54,13 @@ final class TaskCreationController extends SecuredController
      *
      * return string|yii\web\Response
      */
-    public function actionCreate(
-        FilesUploadInterface $fileUploader
-    ): string|yii\web\Response {
-        $model = new Task($fileUploader);
-        $model->scenario = Task::SCENARIO_CREATE;
-        $model->setFileUploader(Yii::$container->get(FilesUploadInterface::class));
-        $categories = Category::find()->all();
-        $cities = City::find()->all();
-
-        if (Yii::$app->request->isPost) {
-            $model->load(Yii::$app->request->post());
-            $model->customer_id = Yii::$app->user->id;
-            $model->status = Task::STATUS_NEW;
-
-            // получаем загруженные файлы‍‍‍‍‍‍‍
-            $model->files = UploadedFile::getInstances($model, 'files');
-
-            if ($model->validate()) {
-                if ($model->save(false)) {
-                    // сохраняем файлы
-                    if (!empty($model->files)) {
-                        $model->processFiles($model->files);
-                    }
-
-                    Yii::$app->session->setFlash('success', 'Задание успешно создано!');
-                    return $this->redirect(['tasks/view', 'id' => $model->id]);
-                }
-            }
-        }
-        return $this->renderCreateForm($model, $categories, $cities);
+    public function actions(): array
+    {
+        return [
+            'create' => [
+                'class' => CreateTaskAction::class,
+            ],
+        ];
     }
 
     protected function renderCreateForm($model, $categories, $cities): string

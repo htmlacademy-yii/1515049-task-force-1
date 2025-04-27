@@ -7,7 +7,12 @@ use yii\helpers\Url;
 /** @var $model app\models\Response */
 ?>
 <div class="response-card">
-    <img class="customer-photo" src="<?= Url::to('@web/img/' . $model->task->customer->avatar) ?>" width="120" height="127"
+    <?php
+    $customerAvatar = $model->task->customer->avatar
+        ? '@web/img/' . $model->task->customer->avatar
+        : '@web/img/man-glasses.jpg';
+    ?>
+    <img class="customer-photo" src="<?= Url::to($customerAvatar) ?>" width="120" height="127"
          alt="Фото заказчика">
     <div class="feedback-wrapper">
         <p class="feedback">«<?= Html::encode($model->comment) ?>»</p>
@@ -20,6 +25,8 @@ use yii\helpers\Url;
             <?= str_repeat('<span class="fill-star">&nbsp;</span>', $model->rating) ?>
             <?= str_repeat('<span>&nbsp;</span>', 5 - $model->rating) ?>
         </div>
-        <p class="info-text"><span class="current-time"><?= Yii::$app->formatter->asRelativeTime($model->created_at) ?></span></p>
+        <p class="info-text">
+            <span class="current-time"><?= Yii::$app->formatter->asRelativeTime(strtotime($model->created_at)) ?></span>
+        </p>
     </div>
 </div>

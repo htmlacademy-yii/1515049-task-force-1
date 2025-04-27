@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\interfaces\FilesUploadInterface;
+use app\logic\AvailableActions;
 use app\models\Response;
 use app\models\Task;
 use Yii;
@@ -32,8 +33,11 @@ class TasksController extends SecuredController
     public function actionIndex(): string
     {
         $task = new Task();
+        if (Yii::$app->request->isGet) {
+            $task->load(Yii::$app->request->get());
+        }
+
         $task->setFileUploader($this->fileUploader);
-        $task->load(Yii::$app->request->post());
 
         $categories = Category::find()->all();
 
@@ -57,10 +61,21 @@ class TasksController extends SecuredController
     public function actionView(int $id): string
     {
         $task = Task::findOne($id);
+
+        if (!$task) {
+            throw new NotFoundHttpException('Задание не найдено.');
+        }
+
+        $availableActions = new AvailableActions(
+            $task->customer_id,
+            $task->status,
+            $task->executor_id
+        );
+
         $responsesDataProvider = new ActiveDataProvider([
             'query' => Response::find()
                 ->where(['task_id' => $id])
-                ->with('executor.executorReviews'),
+                ->with(['executor.executorReviews']),
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -68,13 +83,13 @@ class TasksController extends SecuredController
                 'defaultOrder' => ['created_at' => SORT_DESC],
             ]
         ]);
-        if (!$task) {
-            throw new NotFoundHttpException('Задание не найдено.');
-        }
 
         return $this->render('view-task/view', [
             'task' => $task,
             'responsesDataProvider' => $responsesDataProvider,
+            'availableActions' => $availableActions,
+            'currentUserId' => Yii::$app->user->id,
+            'taskId' => $id,
         ]);
     }
 } // TODO поудалять перед проверкой!!!!

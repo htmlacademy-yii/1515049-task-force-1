@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\handlers\UserAfterSaveHandler;
+use app\logic\AvailableActions;
 use DateMalformedStringException;
 use DateTime;
 use Yii;
@@ -53,8 +54,8 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * ENUM field values
      */
-    const string ROLE_CUSTOMER = 'customer';
-    const string ROLE_EXECUTOR = 'executor';
+    public const string ROLE_CUSTOMER = 'customer';
+    public const string ROLE_EXECUTOR = 'executor';
 
     /**
      * {@inheritdoc}
@@ -84,7 +85,13 @@ class User extends ActiveRecord implements IdentityInterface
             ['role', 'in', 'range' => array_keys(self::optsRole())],
             [['email'], 'unique'],
             [['email'], 'email'],
-            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => City::class, 'targetAttribute' => ['city_id' => 'id']],
+            [
+                ['city_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => City::class,
+                'targetAttribute' => ['city_id' => 'id']
+            ],
         ];
     }
 
@@ -228,7 +235,8 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function getCategories(): ActiveQuery
     {
-        return $this->hasMany(Category::class, ['id' => 'category_id'])->viaTable('user_specializations', ['user_id' => 'id']);
+        return $this->hasMany(Category::class, ['id' => 'category_id'])
+            ->viaTable('user_specializations', ['user_id' => 'id']);
     }
 
     /**
@@ -383,7 +391,7 @@ class User extends ActiveRecord implements IdentityInterface
     private function getFailedTasks(): ActiveQuery
     {
         return $this->hasMany(Task::class, ['executor_id' => 'id'])
-            ->andWhere(['status' => Task::STATUS_FAILED]);
+            ->andWhere(['status' => AvailableActions::STATUS_FAILED]);
     }
 
     /**
