@@ -45,3 +45,13 @@ $this->title = $task->title;
     'model' => new Review(),
     'task' => $task,
 ]) ?>
+
+<?= $this->render('//modals/_refusal', [
+    'model' => new Response(),
+    'task' => $task,
+]) ?>
+
+<?= $this->render('//modals/_cancel', [
+    'model' => new Review(),
+    'task' => $task,
+]) ?>

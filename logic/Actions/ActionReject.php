@@ -8,6 +8,9 @@ use app\models\Response;
 use Throwable;
 use yii\db\StaleObjectException;
 
+/**
+ * Отказать исполнителю на отклик на задание
+ */
 final class ActionReject extends AbstractAction
 {
 

@@ -22,7 +22,7 @@ class AvailableActions
 
     // статусы
     public const string STATUS_NEW = 'new';
-    public const string STATUS_CANCELLED = 'cancelled';
+    public const string STATUS_CANCELLED = 'canceled';
     public const string STATUS_IN_PROGRESS = 'in_progress';
     public const string STATUS_COMPLETED = 'completed';
     public const string STATUS_FAILED = 'failed';
@@ -151,10 +151,8 @@ class AvailableActions
         if ($this->currentStatus === self::STATUS_IN_PROGRESS) {
             if ($userId === $this->customerId) {
                 $actions[] = Yii::$container->get(ActionExecute::class);
-            } else {
-                if ($userId === $this->executorId) {
-                    $actions[] = new ActionFail();
-                }
+            } elseif ($userId === $this->executorId) {
+                $actions[] = new ActionFail();
             }
         }
 

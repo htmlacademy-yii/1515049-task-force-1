@@ -26,6 +26,11 @@ final class ActionButtonsWidget extends Widget
                 if ($action->getInternalName() === 'act_response' && $this->hasResponded()) {
                     continue;
                 }
+
+                if ($action->getInternalName() === 'assign') {
+                    continue;
+                }
+
                 $buttons[] = $this->generateButton($action);
             }
         }
@@ -70,7 +75,7 @@ final class ActionButtonsWidget extends Widget
     {
         return match ($actionName) {
             'act_response' => 'blue',
-            'refusal' => 'orange',
+            'refusal', 'cancel' => 'orange',
             'completion' => 'pink',
             default => 'default',
         };
