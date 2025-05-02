@@ -6,12 +6,17 @@
 
 /** @var $availableActions */
 
+use app\assets\YandexAsset;
 use app\models\Response;
 use app\models\Review;
 use app\models\Task;
 use yii\data\ActiveDataProvider;
+use yii\web\JqueryAsset;
 
 $this->title = $task->title;
+$this->registerJsFile('@web/js/main.js', ['depends' => [JqueryAsset::class]]);
+
+YandexAsset::register($this);
 ?>
 
 <main class="main-content container">

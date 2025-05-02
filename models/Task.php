@@ -3,6 +3,7 @@
 namespace app\models;
 
 use AllowDynamicProperties;
+use app\helpers\YandexMapHelper;
 use app\interfaces\FilesUploadInterface;
 use app\logic\Actions\CreateTaskAction;
 use app\logic\AvailableActions;
@@ -50,6 +51,7 @@ class Task extends ActiveRecord
     public $noLocation;
     public $filterPeriod;
     public array $files = [];
+    public array $location = [];
 
     /**
      * {@inheritdoc}
@@ -95,6 +97,66 @@ class Task extends ActiveRecord
         ];
     }
 
+    public function beforeSave($insert): true
+    {
+        if (!empty($this->location)) {
+            $yandexMapHelper = new YandexMapHelper(
+                $_ENV['YANDEX_API_KEY']
+            );
+            $coordinates = $yandexMapHelper->getCoordinates($this->city->name, $this->location);
+
+            if ($coordinates) {
+                [$latitude, $longitude] = $coordinates;
+                $this->latitude = $latitude;
+                $this->longitude = $longitude;
+            }
+        }
+
+        parent::beforeSave($insert);
+        return true;
+    }
+
+    /**
+     * Устанавливает локацию из массива [latitude, longitude]
+     */
+    public function setLocation(array $location): void
+    {
+        if (count($location) !== 2) {
+            throw new \InvalidArgumentException('Location must contain exactly 2 elements - latitude and longitude');
+        }
+
+        [$this->latitude, $this->longitude] = $location;
+    }
+
+    /**
+     * Возвращает локацию в виде массива [latitude, longitude]
+     */
+    public function getLocation(): ?array
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            return null;
+        }
+
+        return [$this->latitude, $this->longitude];
+    }
+
+    /**
+     * Проверяет, установлена ли локация
+     */
+    public function hasLocation(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
+
+    /**
+     * Очищает локацию
+     */
+    public function clearLocation(): void
+    {
+        $this->latitude = null;
+        $this->longitude = null;
+        $this->city_id = null;
+    }
 
     /**
      * {@inheritdoc}
