@@ -12,12 +12,38 @@ use app\models\Task;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\web\View;
 
 $isCustomer = Yii::$app->user->id === $task->customer_id;
 $userIsExecutorOfAnyResponse = Response::find()
     ->where(['executor_id' => Yii::$app->user->id, 'task_id' => $task->id])
     ->exists();
 
+$latitude = $task->latitude;
+$longitude = $task->longitude;
+
+$this->registerJS(
+    <<<JS
+    ymaps.ready(init);
+function init() {
+    var myMap = new ymaps.Map('map', {
+        center: [$latitude, $longitude],
+        zoom: 16
+    })
+
+    myMap.controls.remove('trafficControl');
+    myMap.controls.remove('searchControl');
+    myMap.controls.remove('geolocationControl');
+    myMap.controls.remove('typeSelector');
+    myMap.controls.remove('fullscreenControl');
+    myMap.controls.remove('rulerControl');
+
+    var placemark = new ymaps.Placemark([$latitude, $longitude]);
+        myMap.geoObjects.add(placemark);
+}
+JS,
+    View::POS_READY
+);
 ?>
 
 <div class="left-column">
@@ -32,9 +58,13 @@ $userIsExecutorOfAnyResponse = Response::find()
         'task' => $task,
     ]); ?>
     <div class="task-map">
-        <img class="map" src="<?= Url::to('@web/img/map.png') ?>" width="725" height="346" alt="Новый арбат, 23, к. 1">
-        <p class="map-address town">Москва</p>
-        <p class="map-address">Новый арбат, 23, к. 1</p>
+        <div id="map" style="width: 725px; height: 346px;"></div>
+        <?php
+        if ($task->city) : ?>
+            <p class="map-address town"><?= Html::encode($task->city->name) ?></p>
+            <p class="map-address"><?= Html::encode($task->latitude . ', ' . $task->longitude) ?></p>
+        <?php
+        endif; ?>
     </div>
     <?php
     if ($isCustomer || $userIsExecutorOfAnyResponse) : ?>
