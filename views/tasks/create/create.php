@@ -61,7 +61,8 @@ $this->title = 'Публикация нового задания';
         <div class="form-group">
             <?= $form->field($model, 'location')->textInput([
                 'id' => 'location',
-                'class' => 'location-icon'
+                'class' => 'location-icon',
+                'placeholder' => 'Город, улица, дом'
             ]) ?>
 
         </div>

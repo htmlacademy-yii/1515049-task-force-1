@@ -47,7 +47,9 @@ final class CreateTaskAction extends Action
             $model->files = UploadedFile::getInstances($model, 'files');
 
             if (!empty($model->location)) {
-                [$cityName, $address] = array_pad(array_map('trim', explode(',', $model->location, 2)), 2, '');
+                $addressParts = array_map('trim', explode(',', $model->location));
+                $cityName = $addressParts[0] ?? '';
+                $address = implode(', ', array_slice($addressParts, 1)) ?? '';
 
                 $mapHelper = new YandexMapHelper(Yii::$app->params['yandexApiKey']);
                 [$lat, $lng] = $mapHelper->getCoordinates($cityName, $address);
