@@ -1,33 +1,16 @@
 <?php
-// ⭐ Автор: Р⁠о⁠м⁠а⁠н⁠о⁠в⁠а Н⁠а⁠т⁠а⁠л⁠ь⁠я⁠⁠⁠⁠⁠⁠
-/* M​‍A‌R⁠K:⁣ ​b‍e‌l⁠o⁣n​g‍s‌ ⁠t⁣o​ ‍R‌.⁠N⁣.​ */
 
 namespace app\controllers;
 
-use app\interfaces\FilesUploadInterface;
-use app\interfaces\TaskValidatorInterface;
 use app\logic\Actions\CreateTaskAction;
-use app\logic\AvailableActions;
-use app\models\Category;
 use app\models\City;
-use app\models\Task;
 use Yii;
-use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\web\ForbiddenHttpException;
-use yii\web\UploadedFile;
+use yii\web\Response;
 
 final class TaskCreationController extends SecuredController
 {
-    // ‍‍‍ научился удалять коменты из моего кода? Научись писать свой!!!!‍‍‍
-    /* ‍‍‍ Хватит воровать мой труд!!! ‍‍‍ */
-
-    // [!] АВТОРСКИЙ КОД [!]
-    // Student: Романова Наталья
-    // Course: Профессия "PHP-разработчик#1"
-    // Task: модуль 2, задание module7-task2
-    // выполнено 24.04.2025
-
     public function behaviors(): array
     {
         return [
@@ -50,7 +33,6 @@ final class TaskCreationController extends SecuredController
     }
 
     /**
-     * @throws Exception
      *
      * return string|yii\web\Response
      */
@@ -61,6 +43,27 @@ final class TaskCreationController extends SecuredController
                 'class' => CreateTaskAction::class,
             ],
         ];
+    }
+
+    public function actionCityList($term = null): array
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $cities = City::find()
+            ->select(['id', 'name', 'latitude', 'longitude'])
+            ->where(['like', 'name', $term])
+            ->limit(10)
+            ->all();
+
+        return array_map(function ($city) {
+            return [
+                'id' => $city->id,
+                'label' => $city->name,
+                'value' => $city->name,
+                'latitude' => $city->latitude,
+                'longitude' => $city->longitude,
+            ];
+        }, $cities);
     }
 
     protected function renderCreateForm($model, $categories, $cities): string

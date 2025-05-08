@@ -3,11 +3,11 @@
 namespace app\helpers;
 
 use Yandex\Geo\Api;
-use Yandex\Geo\Exception;
+use Yii;
 
 final class YandexMapHelper
 {
-    private $apiClient;
+    private Api $apiClient;
 
     public function __construct($key)
     {
@@ -15,26 +15,26 @@ final class YandexMapHelper
         $this->apiClient->setToken($key);
     }
 
-    public function getCoordinates($city, $location)
+    public function getCoordinates($city, $location): array
     {
-        $result = [];
-        $query = $city . ',' . $location;
-
         try {
+            $query = trim($city . (!empty($location) ? ", $location" : ""));
+            if (empty($query)) {
+                return [null, null];
+            }
+
             $this->apiClient->setQuery($query);
             $this->apiClient->load();
 
             $response = $this->apiClient->getResponse();
-            $results = $response->getList();
-
-            if ($results) {
+            if ($response && ($results = $response->getList())) {
                 $geoObject = $results[0];
-                $result = [$geoObject->getLatitude(), $geoObject->getLongitude()];
+                return [$geoObject->getLatitude(), $geoObject->getLongitude()];
             }
-        } catch (Exception $e) {
-            error_log($e->getMessage());
+        } catch (\Exception $e) {
+            Yii::error("Ошибка геокодирования: " . $e->getMessage());
         }
 
-        return $result;
+        return [null, null];
     }
 }
