@@ -12,6 +12,8 @@
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\web\JqueryAsset;
+use yii\web\View;
 use yii\widgets\ActiveForm;
 
 $this->title = 'Публикация нового задания';
@@ -57,12 +59,11 @@ $this->title = 'Публикация нового задания';
             ) ?>
         </div>
         <div class="form-group">
-            <?= $form->field($model, 'city_id', [
-                'inputOptions' => [
-                    'id' => 'location',
-                    'class' => 'location-icon'
-                ]
-            ])->textInput() ?>
+            <?= $form->field($model, 'location')->textInput([
+                'id' => 'location',
+                'class' => 'location-icon'
+            ]) ?>
+
         </div>
         <div class="half-wrapper">
             <div class="form-group">
