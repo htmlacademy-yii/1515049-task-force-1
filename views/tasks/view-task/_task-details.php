@@ -7,11 +7,11 @@
 /** @var $availableActions */
 
 use app\customComponents\ActionButtonsWidget\ActionButtonsWidget;
+use app\helpers\YandexMapHelper;
 use app\models\Response;
 use app\models\Task;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\web\View;
 
 $isCustomer = Yii::$app->user->id === $task->customer_id;
@@ -44,6 +44,14 @@ function init() {
 JS,
     View::POS_READY
 );
+
+$mapHelper = new YandexMapHelper(Yii::$app->params['yandexApiKey']);
+
+$mapHelper->setCache(Yii::$app->cache);
+
+$address = $task->latitude && $task->longitude
+    ? $mapHelper->getAddress($task->latitude, $task->longitude)
+    : 'Адрес не указан';
 ?>
 
 <div class="left-column">
@@ -62,7 +70,7 @@ JS,
         <?php
         if ($task->city) : ?>
             <p class="map-address town"><?= Html::encode($task->city->name) ?></p>
-            <p class="map-address"><?= Html::encode($task->latitude . ', ' . $task->longitude) ?></p>
+            <p class="map-address"><?= Html::encode($address) ?></p>
         <?php
         endif; ?>
     </div>

@@ -3,38 +3,69 @@
 namespace app\helpers;
 
 use Yandex\Geo\Api;
+use Yandex\Geo\Exception;
+use yii\base\Component;
+use yii\caching\CacheInterface;
 use Yii;
 
-final class YandexMapHelper
+final class YandexMapHelper extends Component
 {
-    private Api $apiClient;
+    private string $apiKey;
+    private ?CacheInterface $cache = null;
+    private int $cacheDuration = 86400; // 1 день
 
-    public function __construct($key)
+    public function __construct(string $apiKey, $config = [])
     {
-        $this->apiClient = new Api();
-        $this->apiClient->setToken($key);
+        $this->apiKey = $apiKey;
+        parent::__construct($config);
     }
 
-    public function getCoordinates($city, $location): array
+    public function getAddress(float $latitude, float $longitude): string
     {
-        try {
-            $query = trim($city . (!empty($location) ? ", $location" : ""));
-            if (empty($query)) {
-                return [null, null];
-            }
+        $cacheKey = "address_{$latitude}_{$longitude}";
 
-            $this->apiClient->setQuery($query);
-            $this->apiClient->load();
-
-            $response = $this->apiClient->getResponse();
-            if ($response && ($results = $response->getList())) {
-                $geoObject = $results[0];
-                return [$geoObject->getLatitude(), $geoObject->getLongitude()];
-            }
-        } catch (\Exception $e) {
-            Yii::error("Ошибка геокодирования: " . $e->getMessage());
+        if ($this->cache && ($address = $this->cache->get($cacheKey))) {
+            return $address;
         }
 
-        return [null, null];
+        try {
+            $apiUrl = sprintf(
+                'https://geocode-maps.yandex.ru/1.x/?format=json&geocode=%s,%s&apikey=%s',
+                $longitude,
+                $latitude,
+                $this->apiKey
+            );
+
+            $response = file_get_contents($apiUrl);
+            $data = json_decode($response, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('Invalid JSON response');
+            }
+
+            if (!empty($data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])) {
+                $address = $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'];
+
+                if ($this->cache) {
+                    $this->cache->set($cacheKey, $address, $this->cacheDuration);
+                }
+
+                return $address;
+            }
+        } catch (\Exception $e) {
+            Yii::error("Ошибка обратного геокодирования: " . $e->getMessage());
+        }
+
+        return 'Адрес не определен';
+    }
+
+    public function setCache(CacheInterface $cache): void
+    {
+        $this->cache = $cache;
+    }
+
+    public function setCacheDuration(int $seconds): void
+    {
+        $this->cacheDuration = $seconds;
     }
 }
