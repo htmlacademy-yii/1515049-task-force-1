@@ -15,9 +15,7 @@ use yii\helpers\Html;
 use yii\web\View;
 
 $isCustomer = Yii::$app->user->id === $task->customer_id;
-$userIsExecutorOfAnyResponse = Response::find()
-    ->where(['executor_id' => Yii::$app->user->id, 'task_id' => $task->id])
-    ->exists();
+$userIsExecutorOfAnyResponse = Response::find()->where(['executor_id' => Yii::$app->user->id, 'task_id' => $task->id])->exists();
 
 $latitude = $task->latitude;
 $longitude = $task->longitude;
@@ -49,9 +47,7 @@ $mapHelper = new YandexMapHelper(Yii::$app->params['yandexApiKey']);
 
 $mapHelper->setCache(Yii::$app->cache);
 
-$address = $task->latitude && $task->longitude
-    ? $mapHelper->getAddress($task->latitude, $task->longitude)
-    : 'Адрес не указан';
+$address = $task->latitude && $task->longitude ? $mapHelper->getAddress($task->latitude, $task->longitude) : 'Адрес не указан';
 ?>
 
 <div class="left-column">
@@ -65,8 +61,7 @@ $address = $task->latitude && $task->longitude
         'currentUserId' => Yii::$app->user->id,
         'task' => $task,
     ]); ?>
-    <?php
-    if ($task->latitude && $task->longitude): ?>
+    <?php if ($task->latitude && $task->longitude) : ?>
         <div class="task-map">
             <div id="map" style="width: 725px; height: 346px;"></div>
             <?php
@@ -75,30 +70,26 @@ $address = $task->latitude && $task->longitude
             $cityFromAddress = $addressParts[1] ?? '';
             $streetAddress = implode(', ', array_slice($addressParts, 2));
             ?>
-            <?php
-            if ($cityFromAddress): ?>
+            <?php if ($cityFromAddress) : ?>
                 <p class="map-address town"><?= Html::encode($cityFromAddress) ?></p>
-            <?php
-            endif; ?>
-            <?php
-            if ($streetAddress): ?>
+            <?php endif; ?>
+            <?php if ($streetAddress) : ?>
                 <p class="map-address"><?= Html::encode($streetAddress) ?></p>
-            <?php
-            endif; ?>
+            <?php endif; ?>
         </div>
-    <?php
-    else: ?>
+    <?php else : ?>
         <div class="task-remote">
             <h4>Удалённая работа</h4>
             <p>Задание можно выполнить из любой точки мира</p>
         </div>
-    <?php
-    endif; ?>
-    <?php
-    if ($isCustomer || $userIsExecutorOfAnyResponse) : ?>
-        <h4 class="head-regular">Отклики на задание</h4>
-        <?= $this->render('_response-list', ['responsesDataProvider' => $responsesDataProvider]) ?>
-    <?php
-    endif; ?>
+    <?php endif; ?>
+    <?php if ($isCustomer || $responsesDataProvider->getTotalCount() > 0) : ?>
+        <h4 class="head-regular"><?= $isCustomer ? 'Отклики на задание' : 'Ваш отклик' ?></h4>
+        <?php if ($responsesDataProvider->getTotalCount() > 0) : ?>
+            <?= $this->render('_response-list', ['responsesDataProvider' => $responsesDataProvider]) ?>
+        <?php else : ?>
+            <p class="text-muted"><?= $isCustomer ? 'Пока нет откликов на это задание.' : 'Вы ещё не оставляли отклик.' ?></p>
+        <?php endif; ?>
+    <?php endif; ?>
 </div>
 <div class="overlay"></div>
