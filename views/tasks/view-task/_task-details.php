@@ -65,15 +65,35 @@ $address = $task->latitude && $task->longitude
         'currentUserId' => Yii::$app->user->id,
         'task' => $task,
     ]); ?>
-    <div class="task-map">
-        <div id="map" style="width: 725px; height: 346px;"></div>
-        <?php
-        if ($task->city) : ?>
-            <p class="map-address town"><?= Html::encode($task->city->name) ?></p>
-            <p class="map-address"><?= Html::encode($address) ?></p>
-        <?php
-        endif; ?>
-    </div>
+    <?php
+    if ($task->latitude && $task->longitude): ?>
+        <div class="task-map">
+            <div id="map" style="width: 725px; height: 346px;"></div>
+            <?php
+            $addressFromCoords = $mapHelper->getAddress($task->latitude, $task->longitude);
+            $addressParts = explode(', ', $addressFromCoords);
+            $cityFromAddress = $addressParts[1] ?? '';
+            $streetAddress = implode(', ', array_slice($addressParts, 2));
+            ?>
+            <?php
+            if ($cityFromAddress): ?>
+                <p class="map-address town"><?= Html::encode($cityFromAddress) ?></p>
+            <?php
+            endif; ?>
+            <?php
+            if ($streetAddress): ?>
+                <p class="map-address"><?= Html::encode($streetAddress) ?></p>
+            <?php
+            endif; ?>
+        </div>
+    <?php
+    else: ?>
+        <div class="task-remote">
+            <h4>Удалённая работа</h4>
+            <p>Задание можно выполнить из любой точки мира</p>
+        </div>
+    <?php
+    endif; ?>
     <?php
     if ($isCustomer || $userIsExecutorOfAnyResponse) : ?>
         <h4 class="head-regular">Отклики на задание</h4>

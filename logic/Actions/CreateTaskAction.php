@@ -11,6 +11,7 @@ use app\models\Task;
 use Yii;
 use yii\base\Action;
 use yii\db\Exception;
+use yii\db\Expression;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -49,26 +50,25 @@ final class CreateTaskAction extends Action
             if (!empty($model->location)) {
                 $addressParts = array_map('trim', explode(',', $model->location));
                 $cityName = $addressParts[0] ?? '';
-                $address = implode(', ', array_slice($addressParts, 1)) ?? '';
 
                 $mapHelper = new YandexMapHelper(Yii::$app->params['yandexApiKey']);
-                [$lat, $lng] = $mapHelper->getCoordinates($cityName, $address);
+                $coordinates = $mapHelper->getCoordinates($model->location);
 
-                $model->latitude = $lat;
-                $model->longitude = $lng;
+                if ($coordinates) {
+                    $model->latitude = $coordinates['lat'];
+                    $model->longitude = $coordinates['lng'];
 
-                if (!empty($cityName)) {
-                    $city = City::find()
-                        ->where(['like', 'name', $cityName])
+                    $nearestCity = City::find()
+                        ->orderBy(
+                            new Expression(
+                                "POWER(latitude - {$model->latitude}, 2) + 
+                 POWER(longitude - {$model->longitude}, 2)"
+                            )
+                        )
                         ->one();
 
-                    if ($city) {
-                        $model->city_id = $city->id;
-
-                        if (!$lat && !$lng && $city->latitude && $city->longitude) {
-                            $model->latitude = $city->latitude;
-                            $model->longitude = $city->longitude;
-                        }
+                    if ($nearestCity) {
+                        $model->city_id = $nearestCity->id;
                     }
                 }
             }
