@@ -1,10 +1,8 @@
 <?php
 
 use app\interfaces\FilesUploadInterface;
-use app\logic\Actions\ActionExecute;
 use app\logic\Actions\CreateTaskAction;
 use app\services\FileUploader;
-use app\services\TaskCompletionService;
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
@@ -67,6 +65,7 @@ $config = [
                 'signup' => 'signup/index',
                 'login' => 'auth/login',
                 'logout' => 'auth/logout',
+                'tasks/city-list' => 'tasks/city-list',
             ],
         ],
     ],

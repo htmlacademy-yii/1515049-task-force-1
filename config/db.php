@@ -2,10 +2,10 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=127.0.0.1:3307;dbname=task_force_natalia',
-    'username' => 'root',
-    'password' => 'root',
-    'charset' => 'utf8mb4',
+    'dsn' => $_ENV['DB_DSN'],
+    'username' => $_ENV['DB_USERNAME'],
+    'password' => $_ENV['DB_PASSWORD'],
+    'charset' => $_ENV['DB_CHARSET'],
 
     // Schema cache options (for production environment)
     //'enableSchemaCache' => true,

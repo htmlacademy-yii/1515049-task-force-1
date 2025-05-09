@@ -2,10 +2,12 @@
 
 namespace app\models;
 
-use AllowDynamicProperties;
+use app\helpers\YandexMapHelper;
 use app\interfaces\FilesUploadInterface;
 use app\logic\Actions\CreateTaskAction;
 use app\logic\AvailableActions;
+use InvalidArgumentException;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -25,12 +27,12 @@ use yii\db\ActiveRecord;
  *          AvailableActions::STATUS_FAILED,
  *          AvailableActions::STATUS_CANCELLED
  * @property int|null $city_id
- * @property float|null $latitude
- * @property float|null $longitude
  * @property string|null $ended_at
  * @property int $customer_id
  * @property int|null $executor_id
  * @property string|null $created_at
+ * @property $latitude
+ * @property $longitude
  *
  * @property Category $category
  * @property City $city
@@ -50,6 +52,8 @@ class Task extends ActiveRecord
     public $noLocation;
     public $filterPeriod;
     public array $files = [];
+    public string $location = '';
+    public string $city_name = '';
 
     /**
      * {@inheritdoc}
@@ -75,8 +79,16 @@ class Task extends ActiveRecord
             [['description', 'status'], 'string'],
             [['category_id', 'city_id', 'customer_id', 'executor_id'], 'integer'],
             [['budget', 'latitude', 'longitude'], 'number'],
+            [['latitude', 'longitude'], 'default', 'value' => null],
+            [['city_id'], 'default', 'value' => null],
+            [['city_id'], 'integer'],
+            [['city_name'], 'string'],
             [['ended_at', 'created_at'], 'safe'],
+            [['ended_at'], 'date', 'format' => 'php:Y-m-d'],
+            [['ended_at'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '>=', 'type' => 'date'],
             [['title'], 'string', 'max' => 255],
+            [['location'], 'string', 'max' => 255],
+            [['location'], 'safe'],
             [['categoryIds', 'noResponses', 'noLocation', 'filterPeriod'], 'safe'],
             [
                 ['customer_id'],
@@ -95,6 +107,47 @@ class Task extends ActiveRecord
         ];
     }
 
+    /**
+     * Устанавливает локацию из массива [latitude, longitude]
+     */
+    public function setLocation(array $location): void
+    {
+        if (count($location) !== 2) {
+            throw new InvalidArgumentException('Location must contain exactly 2 elements - latitude and longitude');
+        }
+
+        [$this->latitude, $this->longitude] = $location;
+    }
+
+    /**
+     * Возвращает локацию в виде массива [latitude, longitude]
+     */
+    public function getLocation(): ?array
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            return null;
+        }
+
+        return [$this->latitude, $this->longitude];
+    }
+
+    /**
+     * Проверяет, установлена ли локация
+     */
+    public function hasLocation(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
+
+    /**
+     * Очищает локацию
+     */
+    public function clearLocation(): void
+    {
+        $this->latitude = null;
+        $this->longitude = null;
+        $this->city_id = null;
+    }
 
     /**
      * {@inheritdoc}
@@ -109,6 +162,7 @@ class Task extends ActiveRecord
             'budget' => 'Бюджет',
             'status' => 'Status',
             'city_id' => 'Локация',
+            'location' => 'Локация',
             'latitude' => 'Latitude',
             'longitude' => 'Longitude',
             'ended_at' => 'Срок исполнения',
@@ -126,6 +180,7 @@ class Task extends ActiveRecord
             'description',
             'category_id',
             'budget',
+            'location',
             'city_id',
             'latitude',
             'longitude',
