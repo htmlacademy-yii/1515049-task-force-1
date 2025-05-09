@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\logic\Actions\CreateTaskAction;
-use app\models\City;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\ForbiddenHttpException;
@@ -49,21 +48,38 @@ final class TaskCreationController extends SecuredController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        $cities = City::find()
-            ->select(['id', 'name', 'latitude', 'longitude'])
-            ->where(['like', 'name', $term])
-            ->limit(10)
-            ->all();
+        if (empty($term)) {
+            return [];
+        }
 
-        return array_map(function ($city) {
-            return [
-                'id' => $city->id,
-                'label' => $city->name,
-                'value' => $city->name,
-                'latitude' => $city->latitude,
-                'longitude' => $city->longitude,
-            ];
-        }, $cities);
+        $apiUrl = "https://geocode-maps.yandex.ru/1.x/?format=json&apikey=" .
+            Yii::$app->params['yandexApiKey'] . "&geocode=" . urlencode(
+                $term
+            );
+
+        try {
+            $response = file_get_contents($apiUrl);
+            $data = json_decode($response, true);
+
+            $result = [];
+            if (!empty($data['response']['GeoObjectCollection']['featureMember'])) {
+                foreach ($data['response']['GeoObjectCollection']['featureMember'] as $item) {
+                    $pos = $item['GeoObject']['Point']['pos'];
+                    [$lng, $lat] = explode(' ', $pos);
+
+                    $result[] = [
+                        'value' => $item['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'],
+                        'latitude' => $lat,
+                        'longitude' => $lng
+                    ];
+                }
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            Yii::error("Ошибка геокодирования: " . $e->getMessage());
+            return [];
+        }
     }
 
     protected function renderCreateForm($model, $categories, $cities): string

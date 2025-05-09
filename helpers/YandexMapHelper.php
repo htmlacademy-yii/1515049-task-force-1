@@ -2,26 +2,90 @@
 
 namespace app\helpers;
 
+use app\models\City;
 use Yandex\Geo\Api;
 use Yandex\Geo\Exception;
 use yii\base\Component;
 use yii\caching\CacheInterface;
 use Yii;
+use yii\db\ActiveRecord;
+use yii\db\Expression;
 
 final class YandexMapHelper extends Component
 {
     private string $apiKey;
     private ?CacheInterface $cache = null;
-    private int $cacheDuration = 86400; // 1 день
+    private int $cacheDuration = 86400;
+    private Api $apiClient;
 
     public function __construct(string $apiKey, $config = [])
     {
         $this->apiKey = $apiKey;
+        $this->apiClient = new Api($this->apiKey);
         parent::__construct($config);
     }
 
-    public function getAddress(float $latitude, float $longitude): string
+    public function getCoordinates($address): ?array
     {
+        $cacheKey = 'coords_' . md5($address);
+
+        if ($this->cache && ($coords = $this->cache->get($cacheKey))) {
+            return $coords;
+        }
+
+        try {
+            $apiUrl = sprintf(
+                'https://geocode-maps.yandex.ru/1.x/?format=json&geocode=%s&apikey=%s',
+                urlencode($address),
+                $this->apiKey
+            );
+
+            $response = file_get_contents($apiUrl);
+            $data = json_decode($response, true);
+
+            if (empty($data['response']['GeoObjectCollection']['featureMember'])) {
+                throw new Exception('Адрес не найден');
+            }
+
+            $geoObject = $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject'];
+            $pos = $geoObject['Point']['pos'];
+            list($lng, $lat) = explode(' ', $pos);
+
+            $result = ['lat' => (float)$lat, 'lng' => (float)$lng];
+
+            if ($this->cache) {
+                $this->cache->set($cacheKey, $result, $this->cacheDuration);
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            Yii::error("Ошибка геокодирования: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function findNearestCity(float $latitude, float $longitude): array|ActiveRecord
+    {
+        return City::find()
+            ->select(['*'])
+            ->orderBy(
+                new Expression(
+                    "
+            POWER(latitude - {$latitude}, 2) + 
+            POWER(longitude - {$longitude}, 2)
+        "
+                )
+            )
+            ->limit(1)
+            ->one();
+    }
+
+    public function getAddress(?float $latitude, ?float $longitude): string
+    {
+        if ($latitude === null || $longitude === null) {
+            return 'Адрес не указан';
+        }
+
         $cacheKey = "address_{$latitude}_{$longitude}";
 
         if ($this->cache && ($address = $this->cache->get($cacheKey))) {
@@ -43,8 +107,12 @@ final class YandexMapHelper extends Component
                 throw new Exception('Invalid JSON response');
             }
 
-            if (!empty($data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'])) {
-                $address = $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty']['GeocoderMetaData']['text'];
+            if (!empty(
+            $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
+            ['metaDataProperty']['GeocoderMetaData']['text']
+            )) {
+                $address = $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
+                ['metaDataProperty']['GeocoderMetaData']['text'];
 
                 if ($this->cache) {
                     $this->cache->set($cacheKey, $address, $this->cacheDuration);

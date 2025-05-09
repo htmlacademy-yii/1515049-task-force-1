@@ -79,16 +79,8 @@ class Task extends ActiveRecord
             [['description', 'status'], 'string'],
             [['category_id', 'city_id', 'customer_id', 'executor_id'], 'integer'],
             [['budget', 'latitude', 'longitude'], 'number'],
-            [
-                ['city_id'],
-                'default',
-                'value' => function ($model) {
-                    if ($model->location) {
-                        return Yii::$app->user->getIdentity()->city_id;
-                    }
-                    return null;
-                }
-            ],
+            [['latitude', 'longitude'], 'default', 'value' => null],
+            [['city_id'], 'default', 'value' => null],
             [['city_id'], 'integer'],
             [['city_name'], 'string'],
             [['ended_at', 'created_at'], 'safe'],
@@ -113,25 +105,6 @@ class Task extends ActiveRecord
                 'targetAttribute' => ['executor_id' => 'id']
             ],
         ];
-    }
-
-    public function beforeSave($insert): true
-    {
-        if (!empty($this->location)) {
-            $yandexMapHelper = new YandexMapHelper(
-                $_ENV['YANDEX_API_KEY']
-            );
-            $coordinates = $yandexMapHelper->getCoordinates($this->city->name, $this->location);
-
-            if ($coordinates) {
-                [$latitude, $longitude] = $coordinates;
-                $this->latitude = $latitude;
-                $this->longitude = $longitude;
-            }
-        }
-
-        parent::beforeSave($insert);
-        return true;
     }
 
     /**
