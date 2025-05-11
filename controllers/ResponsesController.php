@@ -13,12 +13,7 @@ use yii\web\Controller;
  */
 final class ResponsesController extends Controller
 {
-
-    // [!] АВТОРСКИЙ КОД [!]
-    // Student: Романова Наталья
-    // Course: Профессия "PHP-разработчик#1"
-    // Task: модуль 2, задание module7-task3
-    public function behaviors(): array
+    public function behaviors() : array
     {
         return [
             'access' => [
@@ -27,7 +22,7 @@ final class ResponsesController extends Controller
                     [
                         'allow' => true,
                         'roles' => ['@'],
-                        'matchCallback' => function ($rule, $action) {
+                        'matchCallback' => function () {
                             return Yii::$app->user->identity->role === 'executor';
                         },
                     ]
@@ -39,7 +34,7 @@ final class ResponsesController extends Controller
     /**
      * @throws Exception
      */
-    public function actionCreate(): \yii\web\Response
+    public function actionCreate() : \yii\web\Response
     {
         $model = new Response();
         $request = Yii::$app->request;
@@ -54,6 +49,7 @@ final class ResponsesController extends Controller
 
             if ($existingResponse) {
                 Yii::$app->session->setFlash('error', 'Вы уже откликались на это задание.');
+
                 return $this->redirect(Yii::$app->request->referrer);
             }
 
@@ -63,6 +59,7 @@ final class ResponsesController extends Controller
 
             if ($model->save()) {
                 Yii::$app->session->setFlash('success', 'Ваш отклик успешно добавлен!');
+
                 return $this->redirect(['tasks/view', 'id' => $taskId]);
             } else {
                 Yii::$app->session->setFlash('error', 'Ой, что-то пошло не так!');

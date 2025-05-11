@@ -1,5 +1,8 @@
 <?php
 
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
 ?>
 <section class="pop-up pop-up--refusal pop-up--close">
     <div class="pop-up--wrapper">
@@ -10,10 +13,6 @@
             Это действие плохо скажется на вашем рейтинге и увеличит счетчик проваленных заданий.
         </p>
         <?php
-
-        use yii\helpers\Html;
-        use yii\widgets\ActiveForm;
-
         $form = ActiveForm::begin([
             'action' => ['/task-refusal/refusal', 'id' => $task->id],
             'method' => 'post',
@@ -23,8 +22,7 @@
             'class' => 'button button--pop-up button--orange',
         ]) ?>
 
-        <?php
-        ActiveForm::end(); ?>
+        <?php ActiveForm::end(); ?>
         <div class="button-container">
             <button class="button--close" type="button">Закрыть окно</button>
         </div>

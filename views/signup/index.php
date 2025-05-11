@@ -27,12 +27,10 @@ $this->title = 'Регистрация';
                 ],
             ]) ?>
             <h3 class="head-main head-task">Регистрация нового пользователя</h3>
-            <?= $form->field($model, 'name')
-                ->textInput(['id' => 'username']) ?>
+            <?= $form->field($model, 'name')->textInput(['id' => 'username']) ?>
 
             <div class="half-wrapper">
-                <?= $form->field($model, 'email')
-                    ->input('email', ['id' => 'email-user']) ?>
+                <?= $form->field($model, 'email')->input('email', ['id' => 'email-user']) ?>
                 <?= $form->field($model, 'city')->dropDownList(
                     $cities,
                     [
@@ -45,14 +43,12 @@ $this->title = 'Регистрация';
 
             <div class="half-wrapper">
                 <div class="form-group">
-                    <?= $form->field($model, 'password')
-                        ->passwordInput(['id' => 'password-user']) ?>
+                    <?= $form->field($model, 'password')->passwordInput(['id' => 'password-user']) ?>
                 </div>
             </div>
 
             <div class="half-wrapper">
-                <?= $form->field($model, 'password_repeat')
-                    ->passwordInput(['id' => 'password-repeat-user']) ?>
+                <?= $form->field($model, 'password_repeat')->passwordInput(['id' => 'password-repeat-user']) ?>
             </div>
             <div class="form-group">
                 <?= $form->field($model, 'is_executor', [
@@ -66,8 +62,7 @@ $this->title = 'Регистрация';
                 ['class' => 'button button--blue']
             ) ?>
 
-            <?php
-            ActiveForm::end() ?>
+            <?php ActiveForm::end() ?>
         </div>
     </div>
 </main>

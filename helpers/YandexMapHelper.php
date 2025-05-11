@@ -66,18 +66,14 @@ final class YandexMapHelper extends Component
 
     public function findNearestCity(float $latitude, float $longitude): array|ActiveRecord
     {
-        return City::find()
-            ->select(['*'])
-            ->orderBy(
-                new Expression(
-                    "
+        return City::find()->select(['*'])->orderBy(
+            new Expression(
+                "
             POWER(latitude - {$latitude}, 2) + 
             POWER(longitude - {$longitude}, 2)
         "
-                )
             )
-            ->limit(1)
-            ->one();
+        )->limit(1)->one();
     }
 
     public function getAddress(?float $latitude, ?float $longitude): string
@@ -107,10 +103,12 @@ final class YandexMapHelper extends Component
                 throw new Exception('Invalid JSON response');
             }
 
-            if (!empty(
-            $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
-            ['metaDataProperty']['GeocoderMetaData']['text']
-            )) {
+            if (
+                !empty(
+                $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
+                ['metaDataProperty']['GeocoderMetaData']['text']
+                )
+            ) {
                 $address = $data['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']
                 ['metaDataProperty']['GeocoderMetaData']['text'];
 

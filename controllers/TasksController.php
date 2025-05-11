@@ -62,14 +62,10 @@ class TasksController extends SecuredController
         }
 
         $availableActions = new AvailableActions(
-            $task->customer_id,
-            $task->status,
-            $task->executor_id
+            $task->customer_id, $task->status, $task->executor_id
         );
 
-        $responsesQuery = Response::find()
-            ->where(['task_id' => $id])
-            ->with(['executor.executorReviews']);
+        $responsesQuery = Response::find()->where(['task_id' => $id])->with(['executor.executorReviews']);
 
         if (Yii::$app->user->id !== $task->customer_id) {
             $responsesQuery->andWhere(['executor_id' => Yii::$app->user->id]);
@@ -93,4 +89,4 @@ class TasksController extends SecuredController
             'taskId' => $id,
         ]);
     }
-} // TODO поудалять перед проверкой!!!!
+}

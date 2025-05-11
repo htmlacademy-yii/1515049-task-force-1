@@ -11,9 +11,7 @@ $user = Yii::$app->user->identity;
 $isExecutorAssigned = $model->task->executor_id !== null;
 ?>
 <?php
-$avatarPath = $model->executor->avatar
-    ? Url::to('@web/img/' . $model->executor->avatar)
-    : Url::to('@web/img/man-glasses.jpg');
+$avatarPath = $model->executor->avatar ? Url::to('@web/img/' . $model->executor->avatar) : Url::to('@web/img/man-glasses.jpg');
 ?>
 <img class="customer-photo" src="<?= $avatarPath; ?>"
      width="146" height="156" alt="Фото заказчиков">
@@ -37,25 +35,20 @@ $avatarPath = $model->executor->avatar
     <p class="info-text"><span class="current-time">
             <?= Yii::$app->formatter->asRelativeTime(strtotime($model->created_at)) ?>
     </p>
-    <?php
-    if (!empty($model->price)) : ?>
+    <?php if (!empty($model->price)) : ?>
         <p class="price price--small"><?= Html::encode($model->price) ?> ₽</p>
-    <?php
-    endif; ?>
+    <?php endif; ?>
 </div>
 <?php
 if ($user->role === 'customer' && !$isExecutorAssigned) : ?>
     <div class="button-popup">
         <?= Html::a(
             'Принять',
-            ['response/accept', 'id' => $model->id],
-            ['class' => 'button button--blue button--small']
+            ['response/accept', 'id' => $model->id], ['class' => 'button button--blue button--small']
         ) ?>
         <?= Html::a(
             'Отказать',
-            ['response/reject', 'id' => $model->id],
-            ['class' => 'button button--orange button--small']
+            ['response/reject', 'id' => $model->id], ['class' => 'button button--orange button--small']
         ) ?>
     </div>
-<?php
-endif; ?>
+<?php endif; ?>

@@ -1,6 +1,5 @@
 <?php
 
-use app\models\Category;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -36,7 +35,7 @@ $form = ActiveForm::begin([
             ])->checkboxList(
                 ArrayHelper::map($categories, 'id', 'name'),
                 [
-                    'item' => function ($index, $label, $name, $checked, $value) {
+                    'item' => function($index, $label, $name, $checked, $value) {
                         return Html::checkbox($name, $checked, [
                             'value' => $value,
                             'label' => Html::encode($label),
@@ -85,16 +84,4 @@ $form = ActiveForm::begin([
 
     <?= Html::submitInput('Искать', ['class' => 'button button--blue']) ?>
 </div>
-<?php
-ActiveForm::end() ?>
-<?php
-$this->registerJs(
-    <<<JS
-    $('#task-filter-form').on('submit', function(e) {
-        console.log('Form submitted');
-        console.log('Period value:', $('#period-value').val());
-        console.log('Form data:', $(this).serialize());
-    });
-JS
-);
-?>
+<?php ActiveForm::end() ?>

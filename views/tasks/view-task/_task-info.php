@@ -3,7 +3,9 @@
 /** @var Task $task */
 
 use app\models\Task;
-use yii\helpers\Html; ?>
+use yii\helpers\Html;
+
+?>
 <div class="right-card black info-card">
     <h4 class="head-card">Информация о задании</h4>
     <dl class="black-list">

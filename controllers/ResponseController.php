@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace app\controllers;
 
-use app\logic\Actions\ActionAssign;
-use app\logic\Actions\ActionReject;
-use app\logic\Actions\ActionRespond;
-use app\models\Response;
+use app\logic\Actions\AcceptResponseAction;
+use app\logic\Actions\RejectResponseAction;
+use Throwable;
 use Yii;
 use yii\db\Exception;
 use yii\db\StaleObjectException;
@@ -21,7 +20,7 @@ use yii\web\NotFoundHttpException;
  */
 final class ResponseController extends Controller
 {
-    public function behaviors(): array
+    public function behaviors() : array
     {
         return [
             'access' => [
@@ -44,59 +43,29 @@ final class ResponseController extends Controller
     }
 
     /**
-     * @throws NotFoundHttpException
-     * @throws ForbiddenHttpException
      * @throws Exception
+     * @throws ForbiddenHttpException
+     * @throws NotFoundHttpException
      */
-    public function actionAccept(int $id): \yii\web\Response
+    public function actionAccept(int $id) : \yii\web\Response
     {
-        $response = Response::findOne($id);
-        if (!$response) {
-            throw new NotFoundHttpException("Отклик не найден");
-        }
+        $action = new AcceptResponseAction();
+        $taskId = $action->run($id);
 
-        $task = $response->task;
-        $action = new ActionAssign();
-
-        if (!$action->isAvailable(Yii::$app->user->id, $task->customer_id, $task->executor_id)) {
-            throw new ForbiddenHttpException("Действие недоступно");
-        }
-
-        if ($action->execute($task, $response)) {
-            Yii::$app->session->setFlash('success', 'Отклик принят');
-        } else {
-            Yii::$app->session->setFlash('error', 'Не удалось принять отклик');
-        }
-        Yii::info("Redirecting to task view: task ID {$task->id}", 'response-actions');
-        return $this->redirect(['tasks/view', 'id' => $task->id]);
+        return $this->redirect(['tasks/view', 'id' => $taskId]);
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      * @throws StaleObjectException
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    public function actionReject(int $id): \yii\web\Response
+    public function actionReject(int $id) : \yii\web\Response
     {
-        $response = Response::findOne($id);
-        if (!$response) {
-            throw new NotFoundHttpException("Отклик не найден");
-        }
+        $action = new RejectResponseAction();
+        $taskId = $action->run($id);
 
-        $task = $response->task;
-        $action = new ActionReject();
-
-        if (!$action->isAvailable(Yii::$app->user->id, $task->customer_id, $task->executor_id)) {
-            throw new ForbiddenHttpException("Действие недоступно");
-        }
-
-        if ($action->execute($response)) {
-            Yii::$app->session->setFlash('success', "Отклик отклонен");
-        } else {
-            Yii::$app->session->setFlash('error', 'Не удалось отклонить отклик');
-        }
-
-        return $this->redirect(['tasks/view', 'id' => $task->id]);
+        return $this->redirect(['tasks/view', 'id' => $taskId]);
     }
 }

@@ -21,9 +21,9 @@ $this->registerCssFile('@web/css/normalize.css');
 $this->registerCssFile('@web/css/style.css');
 $this->registerCssFile('@web/css/site.css');
 
-$apiKey = $_ENV['YANDEX_API_KEY'] ?: '';
+$apiKey = Yii::$app->params['yandexApiKey'];
 if (empty($apiKey)) {
-    throw new \RuntimeException('Yandex Maps API key is not configured');
+    throw new RuntimeException('Yandex Maps API key is not configured');
 }
 $this->registerJsFile('https://api-maps.yandex.ru/2.1/?apikey=' . $apiKey . '&lang=ru_RU');
 
