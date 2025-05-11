@@ -3,12 +3,9 @@
 namespace app\controllers;
 
 use app\logic\AvailableActions;
-use app\models\Category;
 use app\models\Task;
 use app\models\User;
-use Yii;
 use yii\data\ActiveDataProvider;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 
 class UsersController extends SecuredController
@@ -18,10 +15,7 @@ class UsersController extends SecuredController
      */
     public function actionView(int $id): string
     {
-        $user = User::find()
-            ->with(['city', 'categories'])
-            ->where(['id' => $id, 'role' => User::ROLE_EXECUTOR])
-            ->one();
+        $user = User::find()->with(['city', 'categories'])->where(['id' => $id, 'role' => User::ROLE_EXECUTOR])->one();
 
         if (!$user || $user->role !== User::ROLE_EXECUTOR) {
             throw new NotFoundHttpException("Исполнитель не найден");
@@ -35,13 +29,9 @@ class UsersController extends SecuredController
             ],
             'sort' => ['defaultOrder' => ['created_at' => SORT_DESC]]
         ]);
-        $completedTasks = Task::find()
-            ->where(['executor_id' => $id, 'status' => AvailableActions::STATUS_COMPLETED])
-            ->count();
+        $completedTasks = Task::find()->where(['executor_id' => $id, 'status' => AvailableActions::STATUS_COMPLETED])->count();
 
-        $failedTasks = Task::find()
-            ->where(['executor_id' => $id, 'status' => AvailableActions::STATUS_FAILED])
-            ->count();
+        $failedTasks = Task::find()->where(['executor_id' => $id, 'status' => AvailableActions::STATUS_FAILED])->count();
 
         return $this->render('view-user/view', [
             'user' => $user,

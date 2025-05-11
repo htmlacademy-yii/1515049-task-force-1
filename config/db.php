@@ -1,14 +1,11 @@
 <?php
 
+$params = require __DIR__ . '/params.php';
+
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => $_ENV['DB_DSN'],
-    'username' => $_ENV['DB_USERNAME'],
-    'password' => $_ENV['DB_PASSWORD'],
-    'charset' => $_ENV['DB_CHARSET'],
-
-    // Schema cache options (for production environment)
-    //'enableSchemaCache' => true,
-    //'schemaCacheDuration' => 60,
-    //'schemaCache' => 'cache',
+    'dsn' => $params['dbDsn'],
+    'username' => $params['dbUsername'],
+    'password' => $params['dbPassword'],
+    'charset' => $params['dbCharset'],
 ];

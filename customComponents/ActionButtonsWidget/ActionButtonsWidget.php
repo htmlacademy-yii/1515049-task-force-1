@@ -6,6 +6,7 @@ use app\logic\Actions\AbstractAction;
 use app\logic\AvailableActions;
 use app\models\Response;
 use app\models\Task;
+use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;
 
@@ -15,7 +16,7 @@ final class ActionButtonsWidget extends Widget
     public int $currentUserId;
     public Task $task;
 
-    public function run(): string
+    public function run() : string
     {
         $actions = $this->availableActions->getAvailableActions($this->currentUserId);
 
@@ -23,8 +24,11 @@ final class ActionButtonsWidget extends Widget
 
         foreach ($actions as $action) {
             if ($action instanceof AbstractAction) {
-                if ($action->getInternalName() === 'act_response' && $this->hasResponded()) {
-                    continue;
+                if (
+                    $action->getInternalName() === 'act_response' && (Yii::$app->user->identity->role !== 'executor' || $this->hasResponded(
+                        ) || $this->currentUserId === $this->task->customer_id)
+                ) {
+                    return '';
                 }
 
                 if ($action->getInternalName() === 'assign') {
@@ -38,7 +42,7 @@ final class ActionButtonsWidget extends Widget
         return implode(PHP_EOL, $buttons);
     }
 
-    private function hasResponded(): bool
+    private function hasResponded() : bool
     {
         return Response::find()->where(['task_id' => $this->task->id, 'executor_id' => $this->currentUserId])->exists();
     }
@@ -47,16 +51,11 @@ final class ActionButtonsWidget extends Widget
      * Генерирует HTML-код кнопки действия
      *
      * @param AbstractAction $action
+     *
      * @return string
      */
-    private function generateButton(AbstractAction $action): string
+    private function generateButton(AbstractAction $action) : string
     {
-        // [!] АВТОРСКИЙ КОД [!]
-        // Student: Романова Наталья
-        // Course: Профессия "PHP-разработчик#1"
-        // Task: модуль 2, задание module7-task2
-        //  выполнено 24.04.2025
-
         $label = $action->getName();
         $actionName = $action->getInternalName();
         $colorClass = $this->getButtonColor($actionName);
@@ -71,7 +70,7 @@ final class ActionButtonsWidget extends Widget
         );
     }
 
-    private function getButtonColor(string $actionName): string
+    private function getButtonColor(string $actionName) : string
     {
         return match ($actionName) {
             'act_response' => 'blue',

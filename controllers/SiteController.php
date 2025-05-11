@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-
 use app\models\LoginForm;
 use Yii;
 use yii\filters\AccessControl;
@@ -15,7 +14,7 @@ class SiteController extends SecuredController
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'denyCallback' => function () {
+                'denyCallback' => function() {
                     return Yii::$app->controller->redirect(['/tasks']);
                 },
                 'rules' => [

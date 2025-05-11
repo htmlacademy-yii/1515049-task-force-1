@@ -13,11 +13,6 @@ use yii\base\Widget;
 
 class StarRatingWidget extends Widget
 {
-    // [!] АВТОРСКИЙ КОД [!]
-    // Student: Романова Наталья
-    // Course: Профессия "PHP-разработчик#1"
-    // Task: модуль 2, задание module6-task2
-
     public float $rating; // значение рейтинга
     public const int MAX_RATING = 5; // максимальный рейтинг
     public const string DEFAULT_WRAPPER_CLASS = 'stars-rating small'; // css-класс обертки

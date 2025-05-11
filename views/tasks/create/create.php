@@ -1,11 +1,5 @@
 <?php
 
-// [!] АВТОРСКИЙ КОД [!]
-// Student: Романова Наталья
-// Course: Профессия "PHP-разработчик#1"
-// Task: модуль 2, задание module7-task2
-// выполнено 24.04.2025
-
 /* @var $model app\models\Task */
 
 /* @var $categories app\models\Category[] */
@@ -39,8 +33,7 @@ $this->registerJsFile(
         ]) ?>
         <h3 class="head-main head-main"><?= Html::encode($this->title) ?></h3>
         <div class="form-group">
-            <?= $form->field($model, 'title')
-                ->textInput(['id' => 'essence-work']) ?>
+            <?= $form->field($model, 'title')->textInput(['id' => 'essence-work']) ?>
         </div>
         <div class="form-group">
             <?= $form->field($model, 'description', [
@@ -163,7 +156,7 @@ new autoComplete({
     searchEngine: "strict",
     data: {
         src: async (query) => {
-            if (query.length < 3) return [];
+            if (!query || query.length < 3) return [];
             try {
                 const response = await fetch('/task-creation/city-list?term=' + encodeURIComponent(query));
                 return await response.json();

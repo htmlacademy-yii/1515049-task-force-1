@@ -20,11 +20,9 @@ use yii\helpers\Url;
         <?= Html::encode($model->description) ?>
     </p>
     <div class="footer-task">
-        <?php
-        if ($model->city) : ?>
+        <?php if ($model->city) : ?>
             <p class="info-text town-text"><?= Html::encode($model->city->name) ?></p>
-        <?php
-        endif; ?>
+        <?php endif; ?>
         <p class="info-text category-text"><?= Html::encode($model->category->name) ?></p>
         <a href="<?= Url::to(['tasks/view', 'id' => $model->id]) ?>" class="button button--black">Смотреть Задание</a>
     </div>

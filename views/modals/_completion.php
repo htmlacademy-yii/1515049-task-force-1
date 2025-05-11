@@ -43,8 +43,7 @@ use yii\helpers\Html;
                 'id' => 'complete-task-btn'
             ]) ?>
 
-            <?php
-            ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
         </div>
         <div class="button-container">
             <button class="button--close" type="button">Закрыть окно</button>
