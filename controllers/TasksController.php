@@ -12,11 +12,6 @@ use app\models\Category;
 use yii\web\NotFoundHttpException;
 
 class TasksController extends SecuredController
-// [!] АВТОРСКИЙ КОД [!]
-    // Student: Романова Наталья
-    // Course: Профессия "PHP-разработчик#1"
-    // Task: модуль 2, задание module7-task2
-    // изменено 24.04.2025
 {
     private FilesUploadInterface $fileUploader;
 
@@ -67,15 +62,17 @@ class TasksController extends SecuredController
         }
 
         $availableActions = new AvailableActions(
-            $task->customer_id,
-            $task->status,
-            $task->executor_id
+            $task->customer_id, $task->status, $task->executor_id
         );
 
+        $responsesQuery = Response::find()->where(['task_id' => $id])->with(['executor.executorReviews']);
+
+        if (Yii::$app->user->id !== $task->customer_id) {
+            $responsesQuery->andWhere(['executor_id' => Yii::$app->user->id]);
+        }
+
         $responsesDataProvider = new ActiveDataProvider([
-            'query' => Response::find()
-                ->where(['task_id' => $id])
-                ->with(['executor.executorReviews']),
+            'query' => $responsesQuery,
             'pagination' => [
                 'pageSize' => 20,
             ],
@@ -92,4 +89,4 @@ class TasksController extends SecuredController
             'taskId' => $id,
         ]);
     }
-} // TODO поудалять перед проверкой!!!!
+}

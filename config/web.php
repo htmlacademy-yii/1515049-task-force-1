@@ -1,10 +1,9 @@
 <?php
 
 use app\interfaces\FilesUploadInterface;
-use app\logic\Actions\ActionExecute;
 use app\logic\Actions\CreateTaskAction;
 use app\services\FileUploader;
-use app\services\TaskCompletionService;
+use yii\symfonymailer\Mailer;
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
@@ -41,7 +40,7 @@ $config = [
             'errorAction' => 'site/error',
         ],
         'mailer' => [
-            'class' => \yii\symfonymailer\Mailer::class,
+            'class' => Mailer::class,
             'viewPath' => '@app/mail',
             // send all mails to a file by default.
             'useFileTransport' => true,
@@ -67,6 +66,7 @@ $config = [
                 'signup' => 'signup/index',
                 'login' => 'auth/login',
                 'logout' => 'auth/logout',
+                'tasks/city-list' => 'tasks/city-list',
             ],
         ],
     ],

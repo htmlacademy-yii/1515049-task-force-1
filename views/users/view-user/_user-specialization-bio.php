@@ -3,13 +3,14 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
+
 ?>
 
 <div class="specialization-bio">
     <div class="specialization">
         <p class="head-info">Специализации</p>
         <ul class="special-list">
-            <?php foreach ($user->categories as $category): ?>
+            <?php foreach ($user->categories as $category) : ?>
                 <li class="special-item">
                     <a href="<?= Url::to(['tasks/index', 'category_id' => $category->id]) ?>"
                        class="link link--regular">

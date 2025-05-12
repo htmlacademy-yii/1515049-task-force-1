@@ -7,7 +7,6 @@
 use app\assets\AppAsset;
 use yii\bootstrap5\Html;
 use yii\helpers\Url;
-use yii\web\JqueryAsset;
 
 AppAsset::register($this);
 
@@ -22,7 +21,12 @@ $this->registerCssFile('@web/css/normalize.css');
 $this->registerCssFile('@web/css/style.css');
 $this->registerCssFile('@web/css/site.css');
 
-$this->registerJsFile('@web/js/main.js', ['depends' => [JqueryAsset::class]]);
+$apiKey = Yii::$app->params['yandexApiKey'];
+if (empty($apiKey)) {
+    throw new RuntimeException('Yandex Maps API key is not configured');
+}
+$this->registerJsFile('https://api-maps.yandex.ru/2.1/?apikey=' . $apiKey . '&lang=ru_RU');
+
 ?>
 <?php
 $this->beginPage() ?>

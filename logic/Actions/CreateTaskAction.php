@@ -2,6 +2,7 @@
 
 namespace app\logic\Actions;
 
+use app\helpers\YandexMapHelper;
 use app\interfaces\FilesUploadInterface;
 use app\logic\AvailableActions;
 use app\models\Category;
@@ -9,6 +10,8 @@ use app\models\City;
 use app\models\Task;
 use Yii;
 use yii\base\Action;
+use yii\db\Exception;
+use yii\db\Expression;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -25,6 +28,9 @@ final class CreateTaskAction extends Action
         $this->fileUploader = $fileUploader;
     }
 
+    /**
+     * @throws Exception
+     */
     public function run(): Response|string
     {
         $model = new Task();
@@ -35,18 +41,45 @@ final class CreateTaskAction extends Action
         $categories = Category::find()->all();
         $cities = City::find()->all();
 
-        if (\Yii::$app->request->isPost) {
+        if (Yii::$app->request->isPost) {
             $model->load(Yii::$app->request->post());
             $model->customer_id = Yii::$app->user->id;
             $model->status = AvailableActions::STATUS_NEW;
             $model->files = UploadedFile::getInstances($model, 'files');
+
+            if (!empty($model->location)) {
+                $addressParts = array_map('trim', explode(',', $model->location));
+                $cityName = $addressParts[0] ?? '';
+
+                $mapHelper = new YandexMapHelper(Yii::$app->params['yandexApiKey']);
+                $coordinates = $mapHelper->getCoordinates($model->location);
+
+                if ($coordinates) {
+                    $model->latitude = $coordinates['lat'];
+                    $model->longitude = $coordinates['lng'];
+
+                    $nearestCity = City::find()
+                        ->orderBy(
+                            new Expression(
+                                "POWER(latitude - {$model->latitude}, 2) + 
+                 POWER(longitude - {$model->longitude}, 2)"
+                            )
+                        )
+                        ->one();
+
+                    if ($nearestCity) {
+                        $model->city_id = $nearestCity->id;
+                    }
+                }
+            }
+
             if ($model->validate() && $model->save(false)) {
                 $this->handleFileUpload($model);
-
                 Yii::$app->session->setFlash('success', "Задание успешно создано!");
                 return $this->controller->redirect(['tasks/view', 'id' => $model->id]);
             }
         }
+
         return $this->controller->render('@app/views/tasks/create/create', [
             'model' => $model,
             'categories' => $categories,

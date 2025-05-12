@@ -41,7 +41,7 @@ class AvailableActions
     /**
      * @throws RolesException
      */
-    public function checkRole(string $role): void
+    public function checkRole(string $role) : void
     {
         $availableRoles = [self::ROLE_CUSTOMER, self::ROLE_EXECUTOR];
 
@@ -55,7 +55,7 @@ class AvailableActions
      *
      * @return string[]
      */
-    public static function getStatusMap(): array
+    public static function getStatusMap() : array
     {
         return [
             self::STATUS_NEW => 'Новое',
@@ -69,7 +69,7 @@ class AvailableActions
     /**
      * @throws StatusException
      */
-    public function setStatus(string $status): void
+    public function setStatus(string $status) : void
     {
         $availableStatuses = [
             self::STATUS_NEW,
@@ -89,7 +89,7 @@ class AvailableActions
      *
      * @return array [внутреннее_имя => название]
      */
-    public static function getActionsMap(): array
+    public static function getActionsMap() : array
     {
         return [
             'cancel' => 'Отменить',
@@ -104,10 +104,11 @@ class AvailableActions
      * Получение статуса, в который он перейдет после выполнения указанного действия
      *
      * @param AbstractAction $action действие
+     *
      * @return string|null следующий статус или null
      * @throws \Exception
      */
-    public function getNextStatus(AbstractAction $action): ?string
+    public function getNextStatus(AbstractAction $action) : ?string
     {
         $transitions = [
             self::STATUS_NEW => [
@@ -133,9 +134,10 @@ class AvailableActions
      * Доступные действия
      *
      * @param int $userId
+     *
      * @return array|string[]
      */
-    public function getAvailableActions(int $userId): array
+    public function getAvailableActions(int $userId) : array
     {
         $actions = [];
         if ($this->currentStatus === self::STATUS_NEW) {
@@ -143,7 +145,7 @@ class AvailableActions
                 $actions[] = new ActionAssign();
                 $actions[] = new ActionCancel();
             }
-            if ($this->executorId === null) {
+            if ($this->executorId === null && $userId !== $this->customerId) {
                 $actions[] = new ActionRespond();
             }
         }
@@ -155,6 +157,7 @@ class AvailableActions
                 $actions[] = new ActionFail();
             }
         }
+        error_log("User ID: $userId, Customer ID: {$this->customerId}, Executor ID: {$this->executorId}");
 
         return array_filter($actions, function ($action) use ($userId) {
             return $action->isAvailable($userId, $this->customerId, $this->executorId);

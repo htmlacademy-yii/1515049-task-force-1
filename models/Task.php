@@ -2,10 +2,11 @@
 
 namespace app\models;
 
-use AllowDynamicProperties;
 use app\interfaces\FilesUploadInterface;
 use app\logic\Actions\CreateTaskAction;
 use app\logic\AvailableActions;
+use InvalidArgumentException;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -13,34 +14,34 @@ use yii\db\ActiveRecord;
 /**
  * This is the model class for table "tasks".
  *
- * @property int $id
- * @property string $title
- * @property string $description
- * @property int $category_id
- * @property float|null $budget
- * @property string $status Статус задачи. Возможные значения:
+ * @property int                  $id
+ * @property string               $title
+ * @property string               $description
+ * @property int                  $category_id
+ * @property float|null           $budget
+ * @property string               $status Статус задачи. Возможные значения:
  *          AvailableActions::STATUS_NEW,
  *          AvailableActions::STATUS_IN_PROGRESS,
  *          AvailableActions::STATUS_COMPLETED,
  *          AvailableActions::STATUS_FAILED,
  *          AvailableActions::STATUS_CANCELLED
- * @property int|null $city_id
- * @property float|null $latitude
- * @property float|null $longitude
- * @property string|null $ended_at
- * @property int $customer_id
- * @property int|null $executor_id
- * @property string|null $created_at
+ * @property int|null             $city_id
+ * @property string|null          $ended_at
+ * @property int                  $customer_id
+ * @property int|null             $executor_id
+ * @property string|null          $created_at
+ * @property                      $latitude
+ * @property                      $longitude
  *
- * @property Category $category
- * @property City $city
- * @property User $customer
- * @property User $executor
- * @property File[] $files
- * @property Response[] $responses
- * @property-read string $statusLabel
- * @property-read ActiveQuery $searchQuery
- * @property Review[] $reviews
+ * @property Category             $category
+ * @property City                 $city
+ * @property User                 $customer
+ * @property User                 $executor
+ * @property File[]               $files
+ * @property Response[]           $responses
+ * @property-read string          $statusLabel
+ * @property-read ActiveQuery     $searchQuery
+ * @property Review[]             $reviews
  * @property FilesUploadInterface $fileUploader
  */
 class Task extends ActiveRecord
@@ -50,16 +51,18 @@ class Task extends ActiveRecord
     public $noLocation;
     public $filterPeriod;
     public array $files = [];
+    public string $location = '';
+    public string $city_name = '';
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string
+    public static function tableName() : string
     {
         return 'tasks';
     }
 
-    public function rules(): array
+    public function rules() : array
     {
         return [
             [['budget', 'city_id', 'latitude', 'longitude', 'ended_at', 'executor_id'], 'default', 'value' => null],
@@ -68,15 +71,22 @@ class Task extends ActiveRecord
                 ['category_id'],
                 'exist',
                 'skipOnError' => true,
-                'targetClass' =>
-                    Category::class,
+                'targetClass' => Category::class,
                 'targetAttribute' => ['category_id' => 'id']
             ],
             [['description', 'status'], 'string'],
             [['category_id', 'city_id', 'customer_id', 'executor_id'], 'integer'],
             [['budget', 'latitude', 'longitude'], 'number'],
+            [['latitude', 'longitude'], 'default', 'value' => null],
+            [['city_id'], 'default', 'value' => null],
+            [['city_id'], 'integer'],
+            [['city_name'], 'string'],
             [['ended_at', 'created_at'], 'safe'],
+            [['ended_at'], 'date', 'format' => 'php:Y-m-d'],
+            [['ended_at'], 'compare', 'compareValue' => date('Y-m-d'), 'operator' => '>=', 'type' => 'date'],
             [['title'], 'string', 'max' => 255],
+            [['location'], 'string', 'max' => 255],
+            [['location'], 'safe'],
             [['categoryIds', 'noResponses', 'noLocation', 'filterPeriod'], 'safe'],
             [
                 ['customer_id'],
@@ -95,11 +105,52 @@ class Task extends ActiveRecord
         ];
     }
 
+    /**
+     * Устанавливает локацию из массива [latitude, longitude]
+     */
+    public function setLocation(array $location) : void
+    {
+        if (count($location) !== 2) {
+            throw new InvalidArgumentException('Location must contain exactly 2 elements - latitude and longitude');
+        }
+
+        [$this->latitude, $this->longitude] = $location;
+    }
+
+    /**
+     * Возвращает локацию в виде массива [latitude, longitude]
+     */
+    public function getLocation() : ?array
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            return null;
+        }
+
+        return [$this->latitude, $this->longitude];
+    }
+
+    /**
+     * Проверяет, установлена ли локация
+     */
+    public function hasLocation() : bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
+
+    /**
+     * Очищает локацию
+     */
+    public function clearLocation() : void
+    {
+        $this->latitude = null;
+        $this->longitude = null;
+        $this->city_id = null;
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array
+    public function attributeLabels() : array
     {
         return [
             'id' => 'ID',
@@ -109,6 +160,7 @@ class Task extends ActiveRecord
             'budget' => 'Бюджет',
             'status' => 'Status',
             'city_id' => 'Локация',
+            'location' => 'Локация',
             'latitude' => 'Latitude',
             'longitude' => 'Longitude',
             'ended_at' => 'Срок исполнения',
@@ -118,7 +170,7 @@ class Task extends ActiveRecord
         ];
     }
 
-    public function scenarios(): array
+    public function scenarios() : array
     {
         $scenarios = parent::scenarios();
         $scenarios[CreateTaskAction::SCENARIO_CREATE] = [
@@ -126,16 +178,18 @@ class Task extends ActiveRecord
             'description',
             'category_id',
             'budget',
+            'location',
             'city_id',
             'latitude',
             'longitude',
             'ended_at',
             'files'
         ];
+
         return $scenarios;
     }
 
-    public function defineScenario($name, $attributes): void
+    public function defineScenario($name, $attributes) : void
     {
         $scenarios = $this->scenarios();
         $scenarios[$name] = $attributes;
@@ -144,12 +198,12 @@ class Task extends ActiveRecord
 
     private FilesUploadInterface $fileUploader;
 
-    public function setFileUploader(FilesUploadInterface $fileUploader): void
+    public function setFileUploader(FilesUploadInterface $fileUploader) : void
     {
         $this->fileUploader = $fileUploader;
     }
 
-    public function processFiles(array $files): array
+    public function processFiles(array $files) : array
     {
         if ($this->isNewRecord) {
             throw new \RuntimeException('Невозможно обработать файлы для несохраненной задачи');
@@ -161,7 +215,7 @@ class Task extends ActiveRecord
     /**
      * @return array
      */
-    public static function getStatusLabels(): array
+    public static function getStatusLabels() : array
     {
         return AvailableActions::getStatusMap();
     }
@@ -171,20 +225,22 @@ class Task extends ActiveRecord
      *
      * @param $attribute
      * @param $params
+     *
      * @return bool
      */
-    public function validateDeadline($attribute, $params): bool
+    public function validateDeadline($attribute, $params) : bool
     {
         if ($this->$attribute && strtotime($this->$attribute) <= strtotime('now')) {
             $this->addError($attribute, 'Срок исполнения не может быть раньше текущей даты');
         }
+
         return true;
     }
 
     /**
      * @return string
      */
-    public function getStatusLabel(): string
+    public function getStatusLabel() : string
     {
         return AvailableActions::getStatusMap()[$this->status] ?? $this->status;
     }
@@ -192,14 +248,13 @@ class Task extends ActiveRecord
     /**
      * Поиск задач с фильтрами
      */
-    public function getSearchQuery(): ActiveQuery
+    public function getSearchQuery() : ActiveQuery
     {
         $query = self::find()->where(['status' => AvailableActions::STATUS_NEW]);
+        $query->andWhere(['>=', 'ended_at', date('Y-m-d')]);
 
         if (!empty($this->categoryIds)) {
-            $categoryIds = is_array($this->categoryIds)
-                ? $this->categoryIds
-                : array_filter(explode(',', $this->categoryIds));
+            $categoryIds = is_array($this->categoryIds) ? $this->categoryIds : array_filter(explode(',', $this->categoryIds));
 
             if (!empty($categoryIds)) {
                 $query->andWhere(['category_id' => $categoryIds]);
@@ -207,8 +262,7 @@ class Task extends ActiveRecord
         }
 
         if ($this->noResponses) {
-            $query->leftJoin('responses', 'responses.task_id = tasks.id')
-                ->andWhere(['responses.id' => null]);
+            $query->leftJoin('responses', 'responses.task_id = tasks.id')->andWhere(['responses.id' => null]);
         }
 
         if ($this->noLocation) {
@@ -228,7 +282,7 @@ class Task extends ActiveRecord
     /**
      * Создает DataProvider для использования в GridView/ListView
      */
-    public function getDataProvider($pageSize = 5): ActiveDataProvider
+    public function getDataProvider($pageSize = 5) : ActiveDataProvider
     {
         return new ActiveDataProvider([
             'query' => $this->getSearchQuery(),
@@ -242,7 +296,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getCategory(): ActiveQuery
+    public function getCategory() : ActiveQuery
     {
         return $this->hasOne(Category::class, ['id' => 'category_id']);
     }
@@ -250,7 +304,7 @@ class Task extends ActiveRecord
     /**
      * Фильтрация по статусу "Новые"
      */
-    public static function findNewTasks(): ActiveQuery
+    public static function findNewTasks() : ActiveQuery
     {
         return self::find()->where(['status' => AvailableActions::STATUS_NEW]);
     }
@@ -258,7 +312,7 @@ class Task extends ActiveRecord
     /**
      * Фильтрация задач без исполнителя
      */
-    public static function findWithoutExecutor(): ActiveQuery
+    public static function findWithoutExecutor() : ActiveQuery
     {
         return self::find()->where(['executor_id' => null]);
     }
@@ -266,7 +320,7 @@ class Task extends ActiveRecord
     /**
      * Фильтрация задач по периоду
      */
-    public static function filterByPeriod(ActiveQuery $query, int $hours): ActiveQuery
+    public static function filterByPeriod(ActiveQuery $query, int $hours) : ActiveQuery
     {
         return $query->andWhere(['>=', 'created_at', time() - $hours * 3600]);
     }
@@ -274,7 +328,7 @@ class Task extends ActiveRecord
     /**
      * Фильтрация по категориям
      */
-    public static function filterByCategories(ActiveQuery $query, array $categoryIds): ActiveQuery
+    public static function filterByCategories(ActiveQuery $query, array $categoryIds) : ActiveQuery
     {
         return $query->andWhere(['category_id' => $categoryIds]);
     }
@@ -284,7 +338,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getCity(): ActiveQuery
+    public function getCity() : ActiveQuery
     {
         return $this->hasOne(City::class, ['id' => 'city_id']);
     }
@@ -294,7 +348,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getCustomer(): ActiveQuery
+    public function getCustomer() : ActiveQuery
     {
         return $this->hasOne(User::class, ['id' => 'customer_id']);
     }
@@ -304,7 +358,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getExecutor(): ActiveQuery
+    public function getExecutor() : ActiveQuery
     {
         return $this->hasOne(User::class, ['id' => 'executor_id']);
     }
@@ -314,7 +368,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getFiles(): ActiveQuery
+    public function getFiles() : ActiveQuery
     {
         return $this->hasMany(File::class, ['task_id' => 'id']);
     }
@@ -324,7 +378,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getResponses(): ActiveQuery
+    public function getResponses() : ActiveQuery
     {
         return $this->hasMany(Response::class, ['task_id' => 'id']);
     }
@@ -334,7 +388,7 @@ class Task extends ActiveRecord
      *
      * @return ActiveQuery
      */
-    public function getReviews(): ActiveQuery
+    public function getReviews() : ActiveQuery
     {
         return $this->hasMany(Review::class, ['task_id' => 'id']);
     }
@@ -342,12 +396,12 @@ class Task extends ActiveRecord
     /**
      * @return bool
      */
-    public function isStatusNew(): bool
+    public function isStatusNew() : bool
     {
         return $this->status === AvailableActions::STATUS_NEW;
     }
 
-    public function setStatusToNew(): void
+    public function setStatusToNew() : void
     {
         $this->status = AvailableActions::STATUS_NEW;
     }
@@ -355,12 +409,12 @@ class Task extends ActiveRecord
     /**
      * @return bool
      */
-    public function isStatusInProgress(): bool
+    public function isStatusInProgress() : bool
     {
         return $this->status === AvailableActions::STATUS_IN_PROGRESS;
     }
 
-    public function setStatusToInProgress(): void
+    public function setStatusToInProgress() : void
     {
         $this->status = AvailableActions::STATUS_IN_PROGRESS;
     }
@@ -368,12 +422,12 @@ class Task extends ActiveRecord
     /**
      * @return bool
      */
-    public function isStatusCompleted(): bool
+    public function isStatusCompleted() : bool
     {
         return $this->status === AvailableActions::STATUS_COMPLETED;
     }
 
-    public function setStatusToCompleted(): void
+    public function setStatusToCompleted() : void
     {
         $this->status = AvailableActions::STATUS_COMPLETED;
     }
@@ -381,12 +435,12 @@ class Task extends ActiveRecord
     /**
      * @return bool
      */
-    public function isStatusFailed(): bool
+    public function isStatusFailed() : bool
     {
         return $this->status === AvailableActions::STATUS_FAILED;
     }
 
-    public function setStatusToFailed(): void
+    public function setStatusToFailed() : void
     {
         $this->status = AvailableActions::STATUS_FAILED;
     }
@@ -394,12 +448,12 @@ class Task extends ActiveRecord
     /**
      * @return bool
      */
-    public function isStatusCanceled(): bool
+    public function isStatusCanceled() : bool
     {
         return $this->status === AvailableActions::STATUS_CANCELLED;
     }
 
-    public function setStatusToCanceled(): void
+    public function setStatusToCanceled() : void
     {
         $this->status = AvailableActions::STATUS_CANCELLED;
     }

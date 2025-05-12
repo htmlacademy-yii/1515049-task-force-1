@@ -40,8 +40,7 @@ $taskId = Yii::$app->request->get('id');
 
             <?= Html::submitInput('Завершить', ['class' => 'button button--pop-up button--blue']) ?>
 
-            <?php
-            ActiveForm::end(); ?>
+            <?php ActiveForm::end(); ?>
         </div>
 
         <div class="button-container">
