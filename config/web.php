@@ -67,6 +67,8 @@ $config = [
                 'login' => 'auth/login',
                 'logout' => 'auth/logout',
                 'tasks/city-list' => 'tasks/city-list',
+                'my-tasks' => 'my-tasks/index',
+                'my-tasks/<status>' => 'my-tasks/index',
             ],
         ],
     ],
