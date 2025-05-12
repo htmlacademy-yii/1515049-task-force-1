@@ -57,13 +57,23 @@ $this->beginBody() ?>
             if (Yii::$app->controller->id !== 'signup') : ?>
                 <div class="nav-wrapper">
                     <?php
+                    $menuItems = [
+                        ['label' => 'Новое', 'url' => ['/tasks'], 'route' => 'tasks/index'],
+                        ['label' => 'Мои задания', 'url' => ['/my-tasks/index', 'status' => 'new'], 'route' => 'my-tasks/index'],
+                        Yii::$app->user->identity->role === 'customer' ? [
+                            'label' => 'Создать задание',
+                            'url' => ['/publish'],
+                            'route' => 'task-creation/create',
+                        ] : null,
+                        ['label' => 'Настройки', 'url' => ['/account/settings'], 'route' => 'account-settings/settings'],
+                    ];
+
+                    $menuItems = array_filter($menuItems, function ($item) {
+                        return $item !== null;
+                    });
+
                     echo MainMenuWidget::widget([
-                        'items' => [
-                            ['label' => 'Новое', 'url' => ['/tasks'], 'route' => 'tasks/index'],
-                            ['label' => 'Мои задания', 'url' => ['/my-tasks/index', 'status' => 'new'], 'route' => 'my-tasks/index'],
-                            ['label' => 'Создать задание', 'url' => ['/publish'], 'route' => 'task-creation/create'],
-                            ['label' => 'Настройки', 'url' => ['/account/settings'], 'route' => 'account-settings/settings'],
-                        ]
+                        'items' => $menuItems,
                     ]);
                     ?>
                 </div>
@@ -76,7 +86,7 @@ $this->beginBody() ?>
                 <?php
                 if ($user->avatar !== null) : ?>
                     <a href="#">
-                        <img class="user-photo" src="/img/<?= $user->avatar; ?>" width="55" height="55" alt="Аватар">
+                        <img class="user-photo" src="/<?= $user->avatar ?: 'img/avatars/1.png'; ?>" width="55" height="55" alt="Аватар">
                     </a>
                 <?php
                 endif; ?>
@@ -85,7 +95,7 @@ $this->beginBody() ?>
                     <div class="popup-head">
                         <ul class="popup-menu">
                             <li class="menu-item">
-                                <a href="#" class="link">Настройки</a>
+                                <a href="<?= Url::toRoute(['/account/settings']); ?>" class="link">Настройки</a>
                             </li>
                             <li class="menu-item">
                                 <a href="#" class="link">Связаться с нами</a>

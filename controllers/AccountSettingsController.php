@@ -30,11 +30,15 @@ final class AccountSettingsController extends SecuredController
             if ($model->validate()) {
                 $model->applyToUser($user);
 
+                if (!empty($model->new_password)) {
+                    $user->setPassword($model->new_password);
+                }
+
                 if ($user->save()) {
                     $user->updateCategories($model->categories);
                     Yii::$app->session->setFlash('success', 'Настройки успешно сохранены');
 
-                    return $this->redirect(['settings']);
+                    return $this->redirect(['/users/view', 'id' => $user->id]);
                 }
             }
         }
@@ -50,6 +54,32 @@ final class AccountSettingsController extends SecuredController
 
     public function actionSecurity()
     {
-        return $this->render('security');
+        $user = Yii::$app->user->identity;
+        $model = new AccountSettingsForm();
+        $model->loadFromUser($user);
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->avatar = UploadedFile::getInstance($model, 'avatar');
+
+            if ($model->validate()) {
+                $model->applyToUser($user);
+
+                if (!empty($model->new_password)) {
+                    $user->setPassword($model->new_password);
+                }
+
+                if ($user->save()) {
+                    $user->updateCategories($model->categories);
+                    Yii::$app->session->setFlash('success', 'Настройки успешно сохранены');
+
+                    return $this->redirect(['/users/view', 'id' => $user->id]);
+                }
+            }
+        }
+
+        return $this->render('security', [
+            'model' => $model,
+            'user' => $user,
+        ]);
     }
 }
