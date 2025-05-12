@@ -70,7 +70,7 @@ final class AccountSettingsForm extends Model
         $this->telegram = $user->telegram;
         $this->info = $user->info;
         $this->categories = $user->categories;
-        $this->show_contacts = $user->show_contacts;
+        $this->show_contacts = (bool)$user->show_contacts;
         $this->avatar = $user->avatar;
         $this->categories = $user->getCategories()->select('id')->column();
     }
@@ -84,7 +84,7 @@ final class AccountSettingsForm extends Model
         $user->telegram = $this->telegram;
         $user->info = $this->info;
         $user->updateCategories($this->categories);
-        $user->show_contacts = $this->show_contacts;
+        $user->show_contacts = (int)$this->show_contacts;
 
         if (!empty($this->new_password)) {
             $user->setPassword($this->new_password);

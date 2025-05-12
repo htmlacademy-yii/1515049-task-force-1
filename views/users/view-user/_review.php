@@ -8,9 +8,7 @@ use yii\helpers\Url;
 ?>
 <div class="response-card">
     <?php
-    $customerAvatar = $model->task->customer->avatar
-        ? '@web/img/' . $model->task->customer->avatar
-        : '@web/img/man-glasses.jpg';
+    $customerAvatar = $model->task->customer->avatar ? '@web/' . $model->task->customer->avatar : '@web/img/man-glasses.jpg';
     ?>
     <img class="customer-photo" src="<?= Url::to($customerAvatar) ?>" width="120" height="127"
          alt="Фото заказчика">
