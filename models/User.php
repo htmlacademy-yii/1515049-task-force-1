@@ -16,36 +16,36 @@ use yii\web\IdentityInterface;
 /**
  * Class User
  *
- * @property int $id
- * @property string $name
- * @property string $email
- * @property string|null $password_hash
- * @property string|null $auth_key
- * @property string $role
- * @property string|null $avatar
- * @property string|null $telegram
- * @property string|null $phone
- * @property string|null $birthday
- * @property string|null $info
- * @property string|null $created_at
- * @property float|null $executor_rating
- * @property int|null $executor_reviews_count
- * @property int|null $city_id
- * @property int|null $show_contacts
+ * @property int                       $id
+ * @property string                    $name
+ * @property string                    $email
+ * @property string|null               $password_hash
+ * @property string|null               $auth_key
+ * @property string                    $role
+ * @property string|null               $avatar
+ * @property string|null               $telegram
+ * @property string|null               $phone
+ * @property string|null               $birthday
+ * @property string|null               $info
+ * @property string|null               $created_at
+ * @property float|null                $executor_rating
+ * @property int|null                  $executor_reviews_count
+ * @property int|null                  $city_id
+ * @property int|null                  $show_contacts
  *
- * @property-read City|null $city
- * @property-read Category[] $categories
- * @property-read Response[] $responses
- * @property-read Review[] $reviews
- * @property-read Review[] $executorReviews
- * @property-read Task[] $tasks
- * @property-read Task[] $executorTasks
- * @property-read null|int $age
- * @property-read int $executorReviewsCount
- * @property-read ActiveQuery $failedTasks
- * @property-write mixed $password
- * @property-read null|string $authKey
- * @property-read int $executorRank
+ * @property-read City|null            $city
+ * @property-read Category[]           $categories
+ * @property-read Response[]           $responses
+ * @property-read Review[]             $reviews
+ * @property-read Review[]             $executorReviews
+ * @property-read Task[]               $tasks
+ * @property-read Task[]               $executorTasks
+ * @property-read null|int             $age
+ * @property-read int                  $executorReviewsCount
+ * @property-read ActiveQuery          $failedTasks
+ * @property-write mixed               $password
+ * @property-read null|string          $authKey
+ * @property-read int                  $executorRank
  * @property-read UserSpecialization[] $userSpecializations
  */
 class User extends ActiveRecord implements IdentityInterface
@@ -60,7 +60,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public static function tableName(): string
+    public static function tableName() : string
     {
         return 'users';
     }
@@ -68,7 +68,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function rules(): array
+    public function rules() : array
     {
         return [
             [['city_id', 'avatar', 'telegram', 'phone', 'birthday', 'info'], 'default', 'value' => null],
@@ -98,7 +98,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels(): array
+    public function attributeLabels() : array
     {
         return [
             'id' => 'ID',
@@ -123,7 +123,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return int
      */
-    public function getExecutorReviewsCount(): int
+    public function getExecutorReviewsCount() : int
     {
         return $this->getExecutorReviews()->count();
     }
@@ -133,12 +133,12 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getExecutorReviews(): ActiveQuery
+    public function getExecutorReviews() : ActiveQuery
     {
         return $this->hasMany(Review::class, ['executor_id' => 'id']);
     }
 
-    public function behaviors(): array
+    public function behaviors() : array
     {
         return [
             'afterSaveHandler' => [
@@ -150,7 +150,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @throws Exception
      */
-    public function setPassword($password): void
+    public function setPassword($password) : void
     {
         $this->password_hash = Yii::$app->security->generatePasswordHash($password);
     }
@@ -160,7 +160,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return float|int
      */
-    public function calculateExecutorRating(): float|int
+    public function calculateExecutorRating() : float|int
     {
         $totalRating = (float)$this->getExecutorReviews()->sum('rating');
         $reviewCount = (int)$this->getExecutorReviewsCount();
@@ -171,21 +171,18 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * Возвращает место в рейтинге среди исполнителей
+     *
      * @return int
      */
-    public function getExecutorRank(): int
+    public function getExecutorRank() : int
     {
-        $subQuery = self::find()
-            ->select(['id', 'executor_rating'])
-            ->where(['role' => self::ROLE_EXECUTOR])
-            ->andWhere(['not', ['executor_rating' => null]])
-            ->orderBy(['executor_rating' => SORT_DESC]);
+        $subQuery = self::find()->select(['id', 'executor_rating'])->where(['role' => self::ROLE_EXECUTOR])->andWhere(
+            ['not', ['executor_rating' => null]]
+        )->orderBy(['executor_rating' => SORT_DESC]);
 
-        $rank = (new \yii\db\Query())
-            ->select(['rank' => 'COUNT(*) + 1'])
-            ->from(['u' => $subQuery])
-            ->where(['>', 'u.executor_rating', $this->executor_rating])
-            ->scalar();
+        $rank = (new \yii\db\Query())->select(['rank' => 'COUNT(*) + 1'])->from(['u' => $subQuery])->where(
+            ['>', 'u.executor_rating', $this->executor_rating]
+        )->scalar();
 
         return $rank ?: 1;
     }
@@ -195,7 +192,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return void
      */
-    public function updateExecutorStars(): void
+    public function updateExecutorStars() : void
     {
         if ($this->role === self::ROLE_EXECUTOR) {
             $this->executor_rating = $this->calculateExecutorRating();
@@ -209,9 +206,10 @@ class User extends ActiveRecord implements IdentityInterface
      * Ищет пользователя по email
      *
      * @param string $email
+     *
      * @return static|null
      */
-    public static function findByEmail(string $email): ?self
+    public static function findByEmail(string $email) : ?self
     {
         return self::findOne(['email' => $email]);
     }
@@ -220,9 +218,10 @@ class User extends ActiveRecord implements IdentityInterface
      * Валидирует пароль
      *
      * @param string $password
+     *
      * @return bool
      */
-    public function validatePassword(string $password): bool
+    public function validatePassword(string $password) : bool
     {
         return Yii::$app->security->validatePassword($password, $this->password_hash);
     }
@@ -233,10 +232,29 @@ class User extends ActiveRecord implements IdentityInterface
      * @return ActiveQuery
      * @throws InvalidConfigException
      */
-    public function getCategories(): ActiveQuery
+    public function getCategories() : ActiveQuery
     {
-        return $this->hasMany(Category::class, ['id' => 'category_id'])
-            ->viaTable('user_specializations', ['user_id' => 'id']);
+        return $this->hasMany(Category::class, ['id' => 'category_id'])->viaTable('user_specializations', ['user_id' => 'id']);
+    }
+
+    public function updateCategories(array $categoryIds) : void
+    {
+        UserSpecialization::deleteAll(['user_id' => $this->id]);
+
+        foreach ($categoryIds as $categoryId) {
+            $specialization = new UserSpecialization();
+            $specialization->user_id = $this->id;
+            $specialization->category_id = $categoryId;
+            $specialization->save();
+        }
+    }
+
+    /**
+     * Возвращает массив id категорий пользователя
+     */
+    public function getSelectedCategories() : array
+    {
+        return $this->getUserSpecializations()->select('category_id')->column();
     }
 
     /**
@@ -244,7 +262,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getCity(): ActiveQuery
+    public function getCity() : ActiveQuery
     {
         return $this->hasOne(City::class, ['id' => 'city_id']);
     }
@@ -254,7 +272,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @throws DateMalformedStringException
      */
-    public function getAge(): ?int
+    public function getAge() : ?int
     {
         if (empty($this->birthday)) {
             return null;
@@ -272,7 +290,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getResponses(): ActiveQuery
+    public function getResponses() : ActiveQuery
     {
         return $this->hasMany(Response::class, ['executor_id' => 'id']);
     }
@@ -282,7 +300,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getReviews(): ActiveQuery
+    public function getReviews() : ActiveQuery
     {
         return $this->hasMany(Review::class, ['customer_id' => 'id']);
     }
@@ -293,7 +311,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getTasks(): ActiveQuery
+    public function getTasks() : ActiveQuery
     {
         return $this->hasMany(Task::class, ['customer_id' => 'id']);
     }
@@ -303,7 +321,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getExecutorTasks(): ActiveQuery
+    public function getExecutorTasks() : ActiveQuery
     {
         return $this->hasMany(Task::class, ['executor_id' => 'id']);
     }
@@ -313,7 +331,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    public function getUserSpecializations(): ActiveQuery
+    public function getUserSpecializations() : ActiveQuery
     {
         return $this->hasMany(UserSpecialization::class, ['user_id' => 'id']);
     }
@@ -323,9 +341,10 @@ class User extends ActiveRecord implements IdentityInterface
      *Возвращает массив доступных ролей пользователя
      *
      * column role ENUM value labels
+     *
      * @return string[]
      */
-    public static function optsRole(): array
+    public static function optsRole() : array
     {
         return [
             self::ROLE_CUSTOMER => 'customer',
@@ -338,7 +357,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return string
      */
-    public function displayRole(): string
+    public function displayRole() : string
     {
         return self::optsRole()[$this->role];
     }
@@ -348,7 +367,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return bool
      */
-    public function isRoleCustomer(): bool
+    public function isRoleCustomer() : bool
     {
         return $this->role === self::ROLE_CUSTOMER;
     }
@@ -358,7 +377,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return void
      */
-    public function setRoleToCustomer(): void
+    public function setRoleToCustomer() : void
     {
         $this->role = self::ROLE_CUSTOMER;
     }
@@ -368,7 +387,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return bool
      */
-    public function isRoleExecutor(): bool
+    public function isRoleExecutor() : bool
     {
         return $this->role === self::ROLE_EXECUTOR;
     }
@@ -378,7 +397,7 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return void
      */
-    public function setRoleToExecutor(): void
+    public function setRoleToExecutor() : void
     {
         $this->role = self::ROLE_EXECUTOR;
     }
@@ -388,27 +407,28 @@ class User extends ActiveRecord implements IdentityInterface
      *
      * @return ActiveQuery
      */
-    private function getFailedTasks(): ActiveQuery
+    private function getFailedTasks() : ActiveQuery
     {
-        return $this->hasMany(Task::class, ['executor_id' => 'id'])
-            ->andWhere(['status' => AvailableActions::STATUS_FAILED]);
+        return $this->hasMany(Task::class, ['executor_id' => 'id'])->andWhere(['status' => AvailableActions::STATUS_FAILED]);
     }
 
     /**
      * @throws Exception
      */
-    public function beforeSave($insert): bool
+    public function beforeSave($insert) : bool
     {
         if (parent::beforeSave($insert)) {
             if ($this->isNewRecord) {
                 $this->auth_key = Yii::$app->security->generateRandomString();
             }
+
             return true;
         }
+
         return false;
     }
 
-    public static function findIdentity($id): User|IdentityInterface|null
+    public static function findIdentity($id) : User|IdentityInterface|null
     {
         return static::findOne($id);
     }
@@ -416,9 +436,10 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @param $token
      * @param $type
+     *
      * @return IdentityInterface|null
      */
-    public static function findIdentityByAccessToken($token, $type = null): ?IdentityInterface
+    public static function findIdentityByAccessToken($token, $type = null) : ?IdentityInterface
     {
         return null;
     }
@@ -426,7 +447,7 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @return int|string
      */
-    public function getId(): int|string
+    public function getId() : int|string
     {
         return $this->id;
     }
@@ -434,16 +455,17 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @return string|null
      */
-    public function getAuthKey(): ?string
+    public function getAuthKey() : ?string
     {
         return $this->auth_key;
     }
 
     /**
      * @param $authKey
+     *
      * @return bool|null
      */
-    public function validateAuthKey($authKey): ?bool
+    public function validateAuthKey($authKey) : ?bool
     {
         return $this->auth_key === $authKey;
     }

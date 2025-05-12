@@ -5,6 +5,7 @@
 /** @var string $content */
 
 use app\assets\AppAsset;
+use app\customComponents\MainMenuWidget\MainMenuWidget;
 use yii\bootstrap5\Html;
 use yii\helpers\Url;
 
@@ -20,6 +21,8 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 $this->registerCssFile('@web/css/normalize.css');
 $this->registerCssFile('@web/css/style.css');
 $this->registerCssFile('@web/css/site.css');
+
+$this->registerJsFile('@web/js/main.js', ['position' => \yii\web\View::POS_END]);
 
 $apiKey = Yii::$app->params['yandexApiKey'];
 if (empty($apiKey)) {
@@ -53,25 +56,26 @@ $this->beginBody() ?>
             <?php
             if (Yii::$app->controller->id !== 'signup') : ?>
                 <div class="nav-wrapper">
-                    <ul class="nav-list">
-                        <li class="list-item list-item--active">
-                            <a href="<?= Url::to('/tasks') ?>" class="link link--nav">Новое</a>
-                        </li>
-                        <li class="list-item">
-                            <a href="<?= Url::to(['my-tasks/index', 'status' => 'new']) ?>"
-                               class="link link--nav">Мои задания</a>
-                        </li>
-                        <?php
-                        if ($user->role === 'customer') : ?>
-                            <li class="list-item">
-                                <a href="<?= Url::to('/publish') ?>" class="link link--nav">Создать задание</a>
-                            </li>
-                        <?php
-                        endif; ?>
-                        <li class="list-item">
-                            <a href="#" class="link link--nav">Настройки</a>
-                        </li>
-                    </ul>
+                    <?php
+                    $menuItems = [
+                        ['label' => 'Новое', 'url' => ['/tasks'], 'route' => 'tasks/index'],
+                        ['label' => 'Мои задания', 'url' => ['/my-tasks/index', 'status' => 'new'], 'route' => 'my-tasks/index'],
+                        Yii::$app->user->identity->role === 'customer' ? [
+                            'label' => 'Создать задание',
+                            'url' => ['/publish'],
+                            'route' => 'task-creation/create',
+                        ] : null,
+                        ['label' => 'Настройки', 'url' => ['/account/settings'], 'route' => 'account-settings/settings'],
+                    ];
+
+                    $menuItems = array_filter($menuItems, function ($item) {
+                        return $item !== null;
+                    });
+
+                    echo MainMenuWidget::widget([
+                        'items' => $menuItems,
+                    ]);
+                    ?>
                 </div>
             <?php
             endif; ?>
@@ -82,7 +86,7 @@ $this->beginBody() ?>
                 <?php
                 if ($user->avatar !== null) : ?>
                     <a href="#">
-                        <img class="user-photo" src="/img/<?= $user->avatar; ?>" width="55" height="55" alt="Аватар">
+                        <img class="user-photo" src="/<?= $user->avatar ?: 'img/avatars/1.png'; ?>" width="55" height="55" alt="Аватар">
                     </a>
                 <?php
                 endif; ?>
@@ -91,7 +95,7 @@ $this->beginBody() ?>
                     <div class="popup-head">
                         <ul class="popup-menu">
                             <li class="menu-item">
-                                <a href="#" class="link">Настройки</a>
+                                <a href="<?= Url::toRoute(['/account/settings']); ?>" class="link">Настройки</a>
                             </li>
                             <li class="menu-item">
                                 <a href="#" class="link">Связаться с нами</a>
