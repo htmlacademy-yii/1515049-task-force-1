@@ -162,12 +162,11 @@ $this->registerJs(
                         
                         $.getJSON('/task-creation/city-list', {term: query})
                             .done(function(data) {
-                                // Преобразуем данные в нужный формат
-                                var results = data.map(function(item) {
+                                let results = data.map(function(item) {
                                     return {
                                         value: item.value,
-                                        label: item.value, // Добавляем label для отображения
-                                        data: item // Сохраняем все исходные данные
+                                        label: item.value,
+                                        data: item
                                     };
                                 });
                                 resolve(results);
@@ -191,7 +190,6 @@ $this->registerJs(
             },
             resultItem: {
                 content: function(data, element) {
-                    // Явно указываем что отображать
                     element.textContent = data.match;
                 },
                 highlight: true
@@ -208,5 +206,5 @@ $this->registerJs(
     });
 })(jQuery);
 JS,
-    \yii\web\View::POS_READY
+    View::POS_READY
 );
