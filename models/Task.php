@@ -113,7 +113,6 @@ class Task extends ActiveRecord
         if (count($location) !== 2) {
             throw new InvalidArgumentException('Location must contain exactly 2 elements - latitude and longitude');
         }
-
         [$this->latitude, $this->longitude] =
             $location;
     }

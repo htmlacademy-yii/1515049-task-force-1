@@ -32,6 +32,7 @@ $this->registerJsFile(
                 ],
             ]) ?>
             <h3 class="head-main head-main"><?= Html::encode($this->title) ?></h3>
+
             <div class="form-group">
                 <?= $form->field($model, 'title')->textInput(['id' => 'essence-work']) ?>
             </div>
@@ -99,6 +100,7 @@ $this->registerJsFile(
             ActiveForm::end() ?>
         </div>
     </main>
+
 
 <?php
 $this->registerCss(

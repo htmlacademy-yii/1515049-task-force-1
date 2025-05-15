@@ -54,6 +54,7 @@ final class MyTasksController extends SecuredController
                         ]
                     ]
                 );
+
                 $title =
                     'Закрытые';
                 break;
@@ -94,6 +95,7 @@ final class MyTasksController extends SecuredController
                 $query->andWhere(['status' => AvailableActions::STATUS_IN_PROGRESS]);
                 $title =
                     'В процессе';
+
                 break;
             case 'expired':
                 $query->andWhere(['status' => AvailableActions::STATUS_IN_PROGRESS])->andWhere(
