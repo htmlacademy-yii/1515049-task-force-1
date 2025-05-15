@@ -7,7 +7,6 @@ use app\logic\Actions\CreateTaskAction;
 use app\logic\AvailableActions;
 use InvalidArgumentException;
 use RuntimeException;
-use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
