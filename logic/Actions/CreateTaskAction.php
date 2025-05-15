@@ -12,6 +12,7 @@ use Yii;
 use yii\base\Action;
 use yii\db\Exception;
 use yii\db\Expression;
+use yii\validators\Validator;
 use yii\web\Response;
 use yii\web\UploadedFile;
 
@@ -33,57 +34,42 @@ final class CreateTaskAction extends Action
      */
     public function run() : Response|string
     {
-        $model = new Task();
-        $model->scenario = self::SCENARIO_CREATE;
-        $this->configureModelValidation($model);
-        $model->setFileUploader($this->fileUploader);
-
+        $model = $this->createTaskModel();
         $categories = Category::find()->all();
         $cities = City::find()->all();
 
         if (!Yii::$app->request->isPost) {
             return $this->renderForm($model, $categories, $cities);
         }
+
+        $this->loadPostData($model);
+        $this->populateLocationData($model);
+
+        if (!$model->validate()) {
+            return $this->renderForm($model, $categories, $cities);
+        }
+
+        $this->saveTask($model);
+
+        return $this->controller->redirect(['tasks/view', 'id' => $model->id]);
+    }
+
+    private function createTaskModel() : Task
+    {
+        $model = new Task();
+        $model->scenario = self::SCENARIO_CREATE;
+        $this->configureModelValidation($model);
+        $model->setFileUploader($this->fileUploader);
+
+        return $model;
+    }
+
+    private function loadPostData(Task $model) : void
+    {
         $model->load(Yii::$app->request->post());
         $model->customer_id = Yii::$app->user->id;
         $model->status = AvailableActions::STATUS_NEW;
         $model->files = UploadedFile::getInstances($model, 'files');
-
-        $this->populateLocation($model);
-
-        if (!empty($model->location)) {
-            $addressParts = array_map('trim', explode(',', $model->location));
-            $cityName = $addressParts[0] ?? '';
-
-            $mapHelper = new YandexMapHelper(Yii::$app->params['yandexApiKey']);
-            $coordinates = $mapHelper->getCoordinates($model->location);
-
-            if ($coordinates) {
-                $model->latitude = $coordinates['lat'];
-                $model->longitude = $coordinates['lng'];
-
-                $nearestCity = City::find()->orderBy(
-                    new Expression(
-                        "POWER(latitude - {$model->latitude}, 2) + 
-                 POWER(longitude - {$model->longitude}, 2)"
-                    )
-                )->one();
-
-                if ($nearestCity) {
-                    $model->city_id = $nearestCity->id;
-                }
-            }
-
-            if (!$model->validate()) {
-                return $this->renderForm($model, $categories, $cities);
-            }
-        }
-
-        $model->save(false);
-        $this->handleFileUpload($model);
-        Yii::$app->session->setFlash('success', 'Задание успешно создано!');
-
-        return $this->controller->redirect(['tasks/view', 'id' => $model->id]);
     }
 
     private function renderForm(Task $model, array $categories, array $cities) : string
@@ -95,14 +81,11 @@ final class CreateTaskAction extends Action
         ]);
     }
 
-    private function populateLocation(Task $model) : void
+    private function populateLocationData(Task $model) : void
     {
         if (empty($model->location)) {
             return;
         }
-
-        $addressParts = array_map('trim', explode(',', $model->location));
-        $cityName = $addressParts[0] ?? '';
 
         $mapHelper = new YandexMapHelper(Yii::$app->params['yandexApiKey']);
         $coordinates = $mapHelper->getCoordinates($model->location);
@@ -116,14 +99,23 @@ final class CreateTaskAction extends Action
 
         $nearestCity = City::find()->orderBy(
             new Expression(
-                "POWER(latitude - {$model->latitude}, 2) + 
-                POWER(longitude - {$model->longitude}, 2)"
+                "POWER(latitude - {$model->latitude}, 2) + POWER(longitude - {$model->longitude}, 2)"
             )
         )->one();
 
         if ($nearestCity) {
             $model->city_id = $nearestCity->id;
         }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function saveTask(Task $model) : void
+    {
+        $model->save(false);
+        $this->handleFileUpload($model);
+        Yii::$app->session->setFlash('success', 'Задание успешно создано!');
     }
 
     private function configureModelValidation(Task $model) : void
@@ -157,7 +149,7 @@ final class CreateTaskAction extends Action
         ];
 
         foreach ($rules as $rule) {
-            $validator = \yii\validators\Validator::createValidator(
+            $validator = Validator::createValidator(
                 $rule[1],
                 $model,
                 (array)$rule[0],
